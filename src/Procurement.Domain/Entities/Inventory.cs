@@ -1,4 +1,3 @@
-using Procurement.Domain.Common;
 public class Inventory : BaseEntity
 {
     public Guid ProductId { get; set; }

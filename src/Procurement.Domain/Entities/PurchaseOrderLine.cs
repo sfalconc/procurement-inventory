@@ -1,0 +1,21 @@
+public class PurchaseOrderLine : BaseEntity
+{
+    public Guid PurchaseOrderId { get; private set; }
+
+    public PurchaseOrder PurchaseOrder { get; private set; } = null!;
+
+    public Guid ProductId { get; private set; }
+
+    public Product Product { get; private set; } = null!;
+
+    public int Quantity { get; private set; }
+
+    public int QuantityReceived { get; private set; }
+
+    public PurchaseOrderLine(Guid productId, int quantity)
+    {
+        ProductId = productId;
+        Quantity = quantity;
+        QuantityReceived = 0;
+    }
+}
