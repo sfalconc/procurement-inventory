@@ -14,6 +14,5 @@ public class Supplier : BaseEntity
     public string? Email { get; set; }
 
     public string? Phone { get; set; }
-
-    public ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
+    public ICollection<PurchaseOrder> PurchaseOrders { get; private set; } = new List<PurchaseOrder>();
 }

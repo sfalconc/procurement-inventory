@@ -14,5 +14,5 @@ public class Inventory : BaseEntity
 
     public Product Product { get; set; } = null!;
 
-    public ICollection<InventoryMovement> Movements { get; set; } = new List<InventoryMovement>();
+    public ICollection<InventoryMovement> Movements { get; private set; } = new List<InventoryMovement>();
 }

@@ -18,7 +18,7 @@ public class ReceiptLineConfiguration : IEntityTypeConfiguration<ReceiptLine>
 
 
         builder.HasOne(rl => rl.PurchaseOrderLine)
-            .WithMany()
+            .WithMany(pol => pol.ReceiptLines)
             .HasForeignKey(rl => rl.PurchaseOrderLineId)
             .OnDelete(DeleteBehavior.Restrict);
     }

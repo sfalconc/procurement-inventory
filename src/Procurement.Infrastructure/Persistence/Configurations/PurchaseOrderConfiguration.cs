@@ -22,13 +22,13 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
 
 
         builder.HasOne(po => po.Supplier)
-            .WithMany()
+            .WithMany(s => s.PurchaseOrders)
             .HasForeignKey(po => po.SupplierId)
             .OnDelete(DeleteBehavior.Restrict);
 
 
         builder.HasMany(po => po.Lines)
-            .WithOne()
+            .WithOne(pol => pol.PurchaseOrder)
             .HasForeignKey(pol => pol.PurchaseOrderId)
             .OnDelete(DeleteBehavior.Cascade);
     }

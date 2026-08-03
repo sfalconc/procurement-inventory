@@ -24,7 +24,7 @@ public class ReceiptConfiguration : IEntityTypeConfiguration<Receipt>
 
 
         builder.HasMany(r => r.Lines)
-            .WithOne()
+            .WithOne(rl => rl.Receipt)
             .HasForeignKey(rl => rl.ReceiptId)
             .OnDelete(DeleteBehavior.Cascade);
     }

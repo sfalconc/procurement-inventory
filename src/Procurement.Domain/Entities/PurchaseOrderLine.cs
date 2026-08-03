@@ -25,4 +25,6 @@ public class PurchaseOrderLine : BaseEntity
         QuantityReceived = 0;
         UnitPrice = unitPrice;
     }
+
+    public ICollection<ReceiptLine> ReceiptLines { get; private set; } = new List<ReceiptLine>();
 }

@@ -8,5 +8,5 @@ public class Category : BaseEntity
 
     public string? Description { get; set; }
 
-    public ICollection<Product> Products { get; set; } = new List<Product>();
+    public ICollection<Product> Products { get; private set; } = new List<Product>();
 }

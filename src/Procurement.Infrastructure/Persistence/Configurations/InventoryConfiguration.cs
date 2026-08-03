@@ -21,8 +21,11 @@ public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
         builder.Property(i => i.CurrentQuantity)
             .IsRequired();
 
+        builder.Property(i => i.AverageUnitCost)
+            .HasPrecision(18, 2);
+
         builder.HasOne(i => i.Product)
-            .WithOne()
+            .WithOne(p => p.Inventory)
             .HasForeignKey<Inventory>(i => i.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
     }

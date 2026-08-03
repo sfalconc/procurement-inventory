@@ -13,4 +13,5 @@ public class Product : BaseEntity
     public Guid CategoryId { get; set; }
 
     public Category Category { get; set; } = null!;
+    public Inventory Inventory { get; set; } = null!;
 }
