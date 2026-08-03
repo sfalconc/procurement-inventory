@@ -16,10 +16,13 @@ public class PurchaseOrderLine : BaseEntity
 
     public int QuantityReceived { get; private set; }
 
-    public PurchaseOrderLine(Guid productId, int quantity)
+    public decimal UnitPrice { get; private set; }
+
+    public PurchaseOrderLine(Guid productId, int quantity, decimal unitPrice)
     {
         ProductId = productId;
         Quantity = quantity;
         QuantityReceived = 0;
+        UnitPrice = unitPrice;
     }
 }
