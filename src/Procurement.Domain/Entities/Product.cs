@@ -1,4 +1,8 @@
-public class Product
+using Procurement.Domain.Common;
+
+namespace Procurement.Domain.Entities;
+
+public class Product : BaseEntity
 {
     public string Code { get; set; } = null!;
 

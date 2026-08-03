@@ -1,3 +1,7 @@
+using Procurement.Domain.Common;
+
+namespace Procurement.Domain.Entities;
+
 public class Receipt : BaseEntity
 {
     public Guid PurchaseOrderId { get; private set; }

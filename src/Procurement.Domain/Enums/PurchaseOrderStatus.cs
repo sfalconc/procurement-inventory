@@ -1,3 +1,4 @@
+namespace Procurement.Domain.Enums;
 public enum PurchaseOrderStatus
 {
     Draft = 1,

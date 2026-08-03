@@ -1,3 +1,7 @@
+using Procurement.Domain.Common;
+
+namespace Procurement.Domain.Entities;
+
 public class Inventory : BaseEntity
 {
     public Guid ProductId { get; set; }

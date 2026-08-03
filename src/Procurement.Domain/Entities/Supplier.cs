@@ -1,3 +1,6 @@
+using Procurement.Domain.Common;
+
+namespace Procurement.Domain.Entities;
 public class Supplier : BaseEntity
 {
     public string Code { get; set; } = null!;

@@ -1,3 +1,8 @@
+using Procurement.Domain.Common;
+using Procurement.Domain.Enums;
+
+namespace Procurement.Domain.Entities;
+
 public class PurchaseOrder : BaseEntity
 {
     public Guid SupplierId { get; private set; }

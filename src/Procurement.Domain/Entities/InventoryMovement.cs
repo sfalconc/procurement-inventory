@@ -1,3 +1,8 @@
+using Procurement.Domain.Common;
+using Procurement.Domain.Enums;
+
+namespace Procurement.Domain.Entities;
+
 public class InventoryMovement : BaseEntity
 {
     public Guid InventoryId { get; private set; }
