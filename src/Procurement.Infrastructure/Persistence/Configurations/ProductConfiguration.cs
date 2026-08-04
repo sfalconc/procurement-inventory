@@ -20,14 +20,14 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired()
             .HasMaxLength(50);
 
-
         builder.HasIndex(p => p.Code)
             .IsUnique();
-
 
         builder.HasOne(p => p.Category)
             .WithMany(c => c.Products)
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(p => p.IsActive);
     }
 }

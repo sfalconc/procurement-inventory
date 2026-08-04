@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Procurement.Application.Extensions;
 using Procurement.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +10,10 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
 
+builder.Services.AddApplication();
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ProcurementDbContext>(options =>

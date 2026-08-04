@@ -11,5 +11,10 @@ public abstract class BaseEntity
 
     public string? UpdatedBy { get; set; }
 
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; private set; } = true;
+
+    public void Delete()
+    {
+        IsActive = false;
+    }
 }
