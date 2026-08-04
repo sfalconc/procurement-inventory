@@ -1,9 +1,23 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Procurement.Application.Common.Interfaces;
+using Procurement.Infrastructure.Persistence;
+
+namespace Procurement.Infrastructure;
+
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
+        services.AddDbContext<ProcurementDbContext>(options =>
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddScoped<IApplicationDbContext, ProcurementDbContext>();
+
         return services;
     }
 }

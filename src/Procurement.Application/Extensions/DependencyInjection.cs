@@ -10,6 +10,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(
         this IServiceCollection services)
     {
+        Console.WriteLine("### AddApplication ejecutado ###");
         services.AddValidatorsFromAssembly(
             typeof(DependencyInjection).Assembly);
 

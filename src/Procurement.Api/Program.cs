@@ -1,24 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using Procurement.Application.Extensions;
-using Procurement.Infrastructure.Persistence;
+using Procurement.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddApplication();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
 
-builder.Services.AddApplication();
-
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ProcurementDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddApplication();
 
 var app = builder.Build();
 
