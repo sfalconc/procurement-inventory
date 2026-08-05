@@ -3,7 +3,7 @@ using Procurement.Application.Suppliers.DTOs;
 
 namespace Procurement.Application.Suppliers.Validators;
 
-public class UpdateSupplierRequestValidator 
+public class UpdateSupplierRequestValidator
     : AbstractValidator<UpdateSupplierRequest>
 {
     public UpdateSupplierRequestValidator()

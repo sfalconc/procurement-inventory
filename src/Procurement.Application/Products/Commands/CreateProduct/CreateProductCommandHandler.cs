@@ -6,7 +6,7 @@ using Procurement.Domain.Entities;
 
 namespace Procurement.Application.Products.Commands.CreateProduct;
 
-public class CreateProductCommandHandler 
+public class CreateProductCommandHandler
     : IRequestHandler<CreateProductCommand, ProductResponse>
 {
     private readonly IApplicationDbContext _context;

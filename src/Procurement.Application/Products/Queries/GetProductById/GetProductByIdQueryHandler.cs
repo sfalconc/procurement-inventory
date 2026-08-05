@@ -5,7 +5,7 @@ using Procurement.Application.Products.DTOs;
 
 namespace Procurement.Application.Products.Queries.GetProductById;
 
-public class GetProductByIdQueryHandler 
+public class GetProductByIdQueryHandler
     : IRequestHandler<GetProductByIdQuery, ProductResponse?>
 {
     private readonly IApplicationDbContext _context;

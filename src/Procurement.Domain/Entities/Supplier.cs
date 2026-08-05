@@ -20,7 +20,7 @@ public class Supplier : BaseEntity
     private Supplier()
     {
     }
-    
+
     public Supplier(
     string code,
     string name,
