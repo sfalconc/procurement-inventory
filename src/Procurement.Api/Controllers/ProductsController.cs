@@ -1,12 +1,11 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Procurement.Application.Products.Commands.CreateProduct;
+using Procurement.Application.Products.Commands.DeleteProduct;
+using Procurement.Application.Products.Commands.UpdateProduct;
 using Procurement.Application.Products.DTOs;
-using Procurement.Application.Products.Interfaces;
 using Procurement.Application.Products.Queries.GetProductById;
 using Procurement.Application.Products.Queries.GetProducts;
-using Procurement.Application.Products.Commands.UpdateProduct;
-using Procurement.Application.Products.Commands.DeleteProduct;
 
 namespace Procurement.Api.Controllers;
 
@@ -15,14 +14,11 @@ namespace Procurement.Api.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IProductService _productService;
 
     public ProductsController(
-        IMediator mediator,
-        IProductService productService)
+        IMediator mediator)
     {
         _mediator = mediator;
-        _productService = productService;
     }
 
 
@@ -47,12 +43,10 @@ public class ProductsController : ControllerBase
             new GetProductByIdQuery(id),
             cancellationToken);
 
-
         if (product is null)
         {
             return NotFound();
         }
-
 
         return Ok(product);
     }
