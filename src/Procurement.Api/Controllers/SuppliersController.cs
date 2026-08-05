@@ -1,6 +1,11 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Procurement.Application.Suppliers.Commands.CreateSupplier;
+using Procurement.Application.Suppliers.Commands.DeleteSupplier;
+using Procurement.Application.Suppliers.Commands.UpdateSupplier;
 using Procurement.Application.Suppliers.DTOs;
-using Procurement.Application.Suppliers.Interfaces;
+using Procurement.Application.Suppliers.Queries.GetSupplierById;
+using Procurement.Application.Suppliers.Queries.GetSuppliers;
 
 namespace Procurement.Api.Controllers;
 
@@ -8,12 +13,12 @@ namespace Procurement.Api.Controllers;
 [Route("api/[controller]")]
 public class SuppliersController : ControllerBase
 {
-    private readonly ISupplierService _supplierService;
+    private readonly IMediator _mediator;
 
     public SuppliersController(
-        ISupplierService supplierService)
+        IMediator mediator)
     {
-        _supplierService = supplierService;
+        _mediator = mediator;
     }
 
 
@@ -22,9 +27,19 @@ public class SuppliersController : ControllerBase
         CreateSupplierRequest request,
         CancellationToken cancellationToken)
     {
-        var supplier = await _supplierService.CreateAsync(
-            request,
+        var command = new CreateSupplierCommand(
+            request.Code,
+            request.Name,
+            request.TaxId,
+            request.ContactName,
+            request.Email,
+            request.Phone);
+
+
+        var supplier = await _mediator.Send(
+            command,
             cancellationToken);
+
 
         return CreatedAtAction(
             nameof(GetById),
@@ -38,14 +53,20 @@ public class SuppliersController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        var supplier = await _supplierService.GetByIdAsync(
-            id,
+        var query = new GetSupplierByIdQuery(
+            id);
+
+
+        var supplier = await _mediator.Send(
+            query,
             cancellationToken);
+
 
         if (supplier is null)
         {
             return NotFound();
         }
+
 
         return Ok(supplier);
     }
@@ -55,8 +76,13 @@ public class SuppliersController : ControllerBase
     public async Task<ActionResult<IEnumerable<SupplierResponse>>> GetAll(
         CancellationToken cancellationToken)
     {
-        var suppliers = await _supplierService.GetAllAsync(
+        var query = new GetSuppliersQuery();
+
+
+        var suppliers = await _mediator.Send(
+            query,
             cancellationToken);
+
 
         return Ok(suppliers);
     }
@@ -68,10 +94,20 @@ public class SuppliersController : ControllerBase
         UpdateSupplierRequest request,
         CancellationToken cancellationToken)
     {
-        await _supplierService.UpdateAsync(
+        var command = new UpdateSupplierCommand(
             id,
-            request,
+            request.Code,
+            request.Name,
+            request.TaxId,
+            request.ContactName,
+            request.Email,
+            request.Phone);
+
+
+        await _mediator.Send(
+            command,
             cancellationToken);
+
 
         return NoContent();
     }
@@ -82,9 +118,14 @@ public class SuppliersController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        await _supplierService.DeleteAsync(
-            id,
+        var command = new DeleteSupplierCommand(
+            id);
+
+
+        await _mediator.Send(
+            command,
             cancellationToken);
+
 
         return NoContent();
     }
