@@ -1,6 +1,12 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Procurement.Application.Products.Commands.CreateProduct;
 using Procurement.Application.Products.DTOs;
 using Procurement.Application.Products.Interfaces;
+using Procurement.Application.Products.Queries.GetProductById;
+using Procurement.Application.Products.Queries.GetProducts;
+using Procurement.Application.Products.Commands.UpdateProduct;
+using Procurement.Application.Products.Commands.DeleteProduct;
 
 namespace Procurement.Api.Controllers;
 
@@ -8,11 +14,14 @@ namespace Procurement.Api.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
+    private readonly IMediator _mediator;
     private readonly IProductService _productService;
 
     public ProductsController(
+        IMediator mediator,
         IProductService productService)
     {
+        _mediator = mediator;
         _productService = productService;
     }
 
@@ -21,7 +30,8 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAll(
         CancellationToken cancellationToken)
     {
-        var products = await _productService.GetAllAsync(
+        var products = await _mediator.Send(
+            new GetProductsQuery(),
             cancellationToken);
 
         return Ok(products);
@@ -33,14 +43,16 @@ public class ProductsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        var product = await _productService.GetByIdAsync(
-            id,
+        var product = await _mediator.Send(
+            new GetProductByIdQuery(id),
             cancellationToken);
+
 
         if (product is null)
         {
             return NotFound();
         }
+
 
         return Ok(product);
     }
@@ -51,8 +63,12 @@ public class ProductsController : ControllerBase
         CreateProductRequest request,
         CancellationToken cancellationToken)
     {
-        var product = await _productService.CreateAsync(
-            request,
+        var product = await _mediator.Send(
+            new CreateProductCommand(
+                request.Code,
+                request.Name,
+                request.Description,
+                request.CategoryId),
             cancellationToken);
 
         return CreatedAtAction(
@@ -68,9 +84,13 @@ public class ProductsController : ControllerBase
         UpdateProductRequest request,
         CancellationToken cancellationToken)
     {
-        await _productService.UpdateAsync(
-            id,
-            request,
+        await _mediator.Send(
+            new UpdateProductCommand(
+                id,
+                request.Code,
+                request.Name,
+                request.Description,
+                request.CategoryId),
             cancellationToken);
 
         return NoContent();
@@ -82,8 +102,8 @@ public class ProductsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        await _productService.DeleteAsync(
-            id,
+        await _mediator.Send(
+            new DeleteProductCommand(id),
             cancellationToken);
 
         return NoContent();

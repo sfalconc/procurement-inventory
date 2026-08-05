@@ -1,3 +1,4 @@
+using MediatR;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Procurement.Application.Products.Interfaces;
@@ -14,6 +15,11 @@ public static class DependencyInjection
     {
         services.AddValidatorsFromAssembly(
             typeof(DependencyInjection).Assembly);
+
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+        });
 
         services.AddScoped<IProductService, ProductService>();
 
