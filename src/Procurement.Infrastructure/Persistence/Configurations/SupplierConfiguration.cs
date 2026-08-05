@@ -12,16 +12,20 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
 
         builder.HasKey(s => s.Id);
 
+        builder.Property(s => s.Code)
+            .IsRequired()
+            .HasMaxLength(50);
 
         builder.Property(s => s.Name)
             .IsRequired()
             .HasMaxLength(150);
 
-
         builder.Property(s => s.TaxId)
             .IsRequired()
             .HasMaxLength(50);
 
+        builder.HasIndex(s => s.Code)
+            .IsUnique();
 
         builder.HasIndex(s => s.TaxId)
             .IsUnique();

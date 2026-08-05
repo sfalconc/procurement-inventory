@@ -9,6 +9,8 @@ public interface IApplicationDbContext
 
     DbSet<Category> Categories { get; }
 
+    DbSet<Supplier> Suppliers { get; }
+
     Task<int> SaveChangesAsync(
         CancellationToken cancellationToken);
 }
