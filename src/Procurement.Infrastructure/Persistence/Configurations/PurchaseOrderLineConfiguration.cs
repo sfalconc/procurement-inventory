@@ -22,6 +22,12 @@ public class PurchaseOrderLineConfiguration : IEntityTypeConfiguration<PurchaseO
             .IsRequired();
 
 
+        builder.HasOne(pol => pol.PurchaseOrder)
+            .WithMany(po => po.Lines)
+            .HasForeignKey(pol => pol.PurchaseOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+
         builder.HasOne(pol => pol.Product)
             .WithMany()
             .HasForeignKey(pol => pol.ProductId)

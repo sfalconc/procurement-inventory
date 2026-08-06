@@ -14,6 +14,7 @@ public class ReceiptConfiguration : IEntityTypeConfiguration<Receipt>
 
 
         builder.Property(r => r.ReceivedDate)
+            .HasPrecision(0)
             .IsRequired();
 
 

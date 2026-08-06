@@ -16,6 +16,13 @@ public interface IApplicationDbContext
 
     DbSet<InventoryMovement> InventoryMovements { get; }
 
+    DbSet<PurchaseOrder> PurchaseOrders { get; }
+
+    DbSet<PurchaseOrderLine> PurchaseOrderLines { get; }
+
+    DbSet<Receipt> Receipts { get; }
+
+    DbSet<ReceiptLine> ReceiptLines { get; }
     Task<int> SaveChangesAsync(
         CancellationToken cancellationToken);
 }

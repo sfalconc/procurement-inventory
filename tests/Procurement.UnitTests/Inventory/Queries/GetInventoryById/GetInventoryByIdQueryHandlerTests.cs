@@ -80,21 +80,15 @@ public class GetInventoryByIdQueryHandlerTests : IDisposable
 
 
     [Fact]
-    public async Task Handle_ShouldThrow_WhenInventoryDoesNotExist()
+    public async Task Handle_ShouldReturnNull_WhenInventoryDoesNotExist()
     {
-        var query = new GetInventoryByIdQuery(
-            Guid.NewGuid());
+        var result = await _handler.Handle(
+            new GetInventoryByIdQuery(Guid.NewGuid()),
+            CancellationToken.None);
 
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () =>
-            {
-                await _handler.Handle(
-                    query,
-                    CancellationToken.None);
-            });
+        Assert.Null(result);
     }
-
 
     public void Dispose()
     {

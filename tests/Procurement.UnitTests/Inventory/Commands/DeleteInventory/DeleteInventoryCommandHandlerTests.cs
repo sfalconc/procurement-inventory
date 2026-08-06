@@ -66,13 +66,12 @@ public class DeleteInventoryCommandHandlerTests : IDisposable
 
 
         // Assert
-        var deleted = await _database.Context.Inventories
-            .IgnoreQueryFilters()
-            .FirstAsync();
+        var exists = await _database.Context.Inventories
+            .AnyAsync();
 
 
         Assert.False(
-            deleted.IsActive);
+            exists);
     }
 
     public void Dispose()

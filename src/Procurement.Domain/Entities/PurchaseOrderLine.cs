@@ -18,6 +18,8 @@ public class PurchaseOrderLine : BaseEntity
 
     public decimal UnitPrice { get; private set; }
 
+    public int RemainingQuantity => Quantity - QuantityReceived;
+
     public PurchaseOrderLine(Guid productId, int quantity, decimal unitPrice)
     {
         ProductId = productId;
@@ -26,5 +28,38 @@ public class PurchaseOrderLine : BaseEntity
         UnitPrice = unitPrice;
     }
 
+    public void Receive(int quantity)
+    {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.");
+
+        if (QuantityReceived + quantity > Quantity)
+            throw new InvalidOperationException("Cannot receive more than ordered.");
+
+        QuantityReceived += quantity;
+    }
+
+    public void AddReceivedQuantity(int quantity)
+    {
+        QuantityReceived += quantity;
+    }        
+
+
+    public void ReceiveQuantity(int quantity)
+    {
+        if (quantity <= 0)
+        {
+            throw new ArgumentException(
+                "Quantity must be greater than zero.");
+        }
+
+        if (QuantityReceived + quantity > Quantity)
+        {
+            throw new InvalidOperationException(
+                "Cannot receive more than ordered quantity.");
+        }
+
+        QuantityReceived += quantity;
+    }
     public ICollection<ReceiptLine> ReceiptLines { get; private set; } = new List<ReceiptLine>();
 }

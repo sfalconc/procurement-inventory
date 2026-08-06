@@ -18,6 +18,7 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
 
 
         builder.Property(po => po.OrderDate)
+            .HasPrecision(0)
             .IsRequired();
 
 
