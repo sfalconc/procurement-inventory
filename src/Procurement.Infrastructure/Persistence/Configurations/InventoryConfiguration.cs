@@ -12,17 +12,26 @@ public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
         {
             table.HasCheckConstraint(
                 "CK_Inventory_CurrentQuantity",
-                "[CurrentQuantity] >= 0"
-            );
+                "[CurrentQuantity] >= 0");
         });
 
         builder.HasKey(i => i.Id);
 
+        builder.Property(i => i.ProductId)
+            .IsRequired();
+
         builder.Property(i => i.CurrentQuantity)
             .IsRequired();
 
+        builder.Property(i => i.MinimumStock)
+            .IsRequired();
+
         builder.Property(i => i.AverageUnitCost)
-            .HasPrecision(18, 2);
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        builder.HasIndex(i => i.ProductId)
+            .IsUnique();
 
         builder.HasOne(i => i.Product)
             .WithOne(p => p.Inventory)
