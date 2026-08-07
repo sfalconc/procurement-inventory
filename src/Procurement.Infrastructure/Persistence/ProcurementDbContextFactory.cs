@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Procurement.Infrastructure.Identity;
 
 namespace Procurement.Infrastructure.Persistence;
 
@@ -24,6 +25,8 @@ public class ProcurementDbContextFactory : IDesignTimeDbContextFactory<Procureme
 
         optionsBuilder.UseSqlServer(connectionString);
 
-        return new ProcurementDbContext(optionsBuilder.Options);
-    }
+        return new ProcurementDbContext(
+            optionsBuilder.Options,
+            new DesignTimeCurrentUserService());
+            }
 }

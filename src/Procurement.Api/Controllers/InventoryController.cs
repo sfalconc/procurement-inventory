@@ -8,12 +8,14 @@ using Procurement.Application.Inventory.Queries.GetInventories;
 using Procurement.Application.Inventory.Queries.GetInventoryById;
 using Procurement.Application.Inventory.Commands.CreateInventoryMovement;
 using Procurement.Application.Inventory.Queries.GetLowStockInventories;
-using Procurement.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
+using Procurement.Application.Common.Constants;
 
 namespace Procurement.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = PolicyConstants.RequireWarehouse)]
 public class InventoryController : ControllerBase
 {
     private readonly IMediator _mediator;

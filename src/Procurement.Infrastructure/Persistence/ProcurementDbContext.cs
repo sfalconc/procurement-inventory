@@ -1,12 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Procurement.Domain.Entities;
 using Procurement.Application.Common.Interfaces;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Procurement.Infrastructure.Persistence;
 public class ProcurementDbContext : DbContext, IApplicationDbContext
 {
-    public ProcurementDbContext(DbContextOptions<ProcurementDbContext> options) : base(options)
+    private readonly ICurrentUserService _currentUserService;
+
+    public ProcurementDbContext(
+        DbContextOptions<ProcurementDbContext> options,
+        ICurrentUserService currentUserService)
+        : base(options)
     {
+        _currentUserService = currentUserService;
     }
 
     public DbSet<Category> Categories => Set<Category>();
@@ -26,7 +33,36 @@ public class ProcurementDbContext : DbContext, IApplicationDbContext
     public DbSet<Receipt> Receipts => Set<Receipt>();
 
     public DbSet<ReceiptLine> ReceiptLines => Set<ReceiptLine>();
+    public override async Task<int> SaveChangesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        UpdateAuditFields();
 
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void UpdateAuditFields()
+    {
+        foreach (EntityEntry entry in ChangeTracker.Entries())
+        {
+            if (entry.Entity is not Domain.Common.BaseEntity entity)
+            {
+                continue;
+            }
+
+            if (entry.State == EntityState.Added)
+            {
+                entity.CreatedAt = DateTime.UtcNow;
+                entity.CreatedBy = _currentUserService.UserId;
+            }
+
+            if (entry.State == EntityState.Modified)
+            {
+                entity.MarkAsUpdated(
+                    _currentUserService.UserId);
+            }
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

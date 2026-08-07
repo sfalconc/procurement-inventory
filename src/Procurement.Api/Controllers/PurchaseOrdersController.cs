@@ -8,11 +8,14 @@ using Procurement.Application.PurchaseOrders.Commands.UpdatePurchaseOrder;
 using Procurement.Application.PurchaseOrders.Commands.ReceivePurchaseOrder;
 using Procurement.Application.PurchaseOrders.Queries.GetPurchaseOrderById;
 using Procurement.Application.PurchaseOrders.Queries.GetPurchaseOrders;
+using Microsoft.AspNetCore.Authorization;
+using Procurement.Application.Common.Constants;
 
 namespace Procurement.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = PolicyConstants.RequirePurchaser)]
 public class PurchaseOrdersController : ControllerBase
 {
     private readonly IMediator _mediator;

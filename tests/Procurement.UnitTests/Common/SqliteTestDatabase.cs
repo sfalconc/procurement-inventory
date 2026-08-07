@@ -1,6 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Procurement.Infrastructure.Persistence;
+using Procurement.Application.Common.Interfaces;
 
 namespace Procurement.UnitTests.Common;
 
@@ -21,7 +22,9 @@ public class SqliteTestDatabase : IDisposable
             .UseSqlite(_connection)
             .Options;
 
-        Context = new ProcurementDbContext(options);
+        Context = new ProcurementDbContext(
+            options,
+            new TestCurrentUserService());
 
         Context.Database.EnsureCreated();
     }

@@ -17,4 +17,11 @@ public abstract class BaseEntity
     {
         IsActive = false;
     }
+
+    public void MarkAsUpdated(
+    string? updatedBy)
+    {
+        UpdatedAt = DateTime.UtcNow;
+        UpdatedBy = updatedBy;
+    }
 }
