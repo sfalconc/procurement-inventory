@@ -23,10 +23,11 @@ public class DeleteProductCommandHandlerTests : IDisposable
     public async Task Handle_ShouldSoftDeleteProduct_WhenProductExists()
     {
         // Arrange
-        var category = new Category
+        var category = new Category(
+            "Electronics",
+            null)
         {
-            Id = Guid.NewGuid(),
-            Name = "Electronics"
+            Id = Guid.NewGuid()
         };
 
 

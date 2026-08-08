@@ -25,11 +25,9 @@ public class DeleteInventoryCommandHandlerTests : IDisposable
     public async Task Handle_ShouldDeleteInventory_WhenExists()
     {
         // Arrange
-        var category = new Category
-        {
-            Name = "Electronics",
-            Description = "Test category"
-        };
+        var category = new Category(
+            "Electronics",
+            "Test category");
 
         _database.Context.Categories.Add(category);
 

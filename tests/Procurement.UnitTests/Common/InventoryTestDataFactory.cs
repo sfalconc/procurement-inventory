@@ -8,11 +8,8 @@ public static class InventoryTestDataFactory
 {
     public static Category CreateCategory()
     {
-        return new Category
-        {
-            Name = "Test Category",
-            Description = "Category for tests"
-        };
+        return new Category("Test Category",
+            "Category for tests");
     }
 
     public static Product CreateProduct(Guid categoryId)

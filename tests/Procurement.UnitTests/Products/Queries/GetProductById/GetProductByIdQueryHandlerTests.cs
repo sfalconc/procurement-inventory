@@ -23,10 +23,11 @@ public class GetProductByIdQueryHandlerTests : IDisposable
     public async Task Handle_ShouldReturnProduct_WhenProductExists()
     {
         // Arrange
-        var category = new Category
+        var category = new Category(
+            "Electronics",
+            null)
         {
-            Id = Guid.NewGuid(),
-            Name = "Electronics"
+            Id = Guid.NewGuid()
         };
 
         var product = new Product(

@@ -23,18 +23,19 @@ public class UpdateProductCommandHandlerTests : IDisposable
     public async Task Handle_ShouldUpdateProduct_WhenProductExists()
     {
         // Arrange
-        var category = new Category
+        var category = new Category(
+            "Electronics",
+            null)
         {
-            Id = Guid.NewGuid(),
-            Name = "Electronics"
+            Id = Guid.NewGuid()
         };
 
-        var newCategory = new Category
+        var newCategory = new Category(
+            "Computers",
+            null)
         {
-            Id = Guid.NewGuid(),
-            Name = "Computers"
+            Id = Guid.NewGuid()
         };
-
 
         var product = new Product(
             "OLD-CODE",
@@ -123,12 +124,12 @@ public class UpdateProductCommandHandlerTests : IDisposable
     public async Task Handle_ShouldThrowException_WhenCategoryDoesNotExist()
     {
         // Arrange
-        var category = new Category
+        var category = new Category(
+            "Electronics",
+            null)
         {
-            Id = Guid.NewGuid(),
-            Name = "Electronics"
+            Id = Guid.NewGuid()
         };
-
 
         var product = new Product(
             "PHONE-001",

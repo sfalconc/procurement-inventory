@@ -23,12 +23,9 @@ public class CreateProductCommandHandlerTests : IDisposable
     public async Task Handle_ShouldCreateProduct_WhenCategoryExists()
     {
         // Arrange
-        var category = new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = "Electronics",
-            Description = "Test category"
-        };
+        var category = new Category(
+            "Electronics",
+            "Test category");
 
         _database.Context.Categories.Add(category);
 

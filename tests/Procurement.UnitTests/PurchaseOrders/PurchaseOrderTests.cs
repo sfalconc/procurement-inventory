@@ -6,34 +6,28 @@ namespace Procurement.UnitTests.PurchaseOrders;
 public class PurchaseOrderTests
 {
     [Fact]
-    public void SetStatus_ShouldMoveFromDraftToPendingApproval()
+    public void Approve_ShouldMoveFromDraftToApproved()
     {
         var order = new PurchaseOrder(
             Guid.NewGuid());
 
-
-        order.SetStatus(
-            PurchaseOrderStatus.PendingApproval);
-
+        order.Approve();
 
         Assert.Equal(
-            PurchaseOrderStatus.PendingApproval,
+            PurchaseOrderStatus.Approved,
             order.Status);
     }
 
-
     [Fact]
-    public void SetStatus_ShouldThrow_WhenCompletingDraftOrder()
+    public void MarkAsCompleted_ShouldThrow_WhenOrderIsDraft()
     {
         var order = new PurchaseOrder(
             Guid.NewGuid());
-
 
         Assert.Throws<InvalidOperationException>(
             () =>
             {
-                order.SetStatus(
-                    PurchaseOrderStatus.Completed);
+                order.MarkAsCompleted();
             });
     }
 }

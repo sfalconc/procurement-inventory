@@ -23,11 +23,10 @@ public class GetLowStockInventoriesQueryHandlerTests : IDisposable
     [Fact]
     public async Task Handle_ShouldReturnOnlyLowStockInventories()
     {
-        var category = new Category
-        {
-            Name = "Electronics",
-            Description = "Test category"
-        };
+        var category = new Category(
+            "Electronics",
+             "Test category"
+        );
 
         _database.Context.Categories.Add(category);
 

@@ -24,11 +24,9 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
 
     private async Task<Product> CreateProduct()
     {
-        var category = new Category
-        {
-            Name = "Electronics",
-            Description = "Test category"
-        };
+        var category = new Category(
+            "Electronics", 
+            "Test category");
 
         _database.Context.Categories.Add(category);
 

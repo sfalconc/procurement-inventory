@@ -24,11 +24,9 @@ public class GetInventoriesQueryHandlerTests : IDisposable
     public async Task Handle_ShouldReturnAllInventories()
     {
         // Arrange
-        var category = new Category
-        {
-            Name = "Electronics",
-            Description = "Test category"
-        };
+        var category = new Category(
+            "Electronics",
+            "Test category");
 
 
         _database.Context.Categories.Add(category);
