@@ -6,11 +6,14 @@ using Procurement.Application.Suppliers.Commands.UpdateSupplier;
 using Procurement.Application.Suppliers.DTOs;
 using Procurement.Application.Suppliers.Queries.GetSupplierById;
 using Procurement.Application.Suppliers.Queries.GetSuppliers;
+using Microsoft.AspNetCore.Authorization;
+using Procurement.Application.Common.Constants;
 
 namespace Procurement.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = PolicyConstants.RequirePurchaser)]
 public class SuppliersController : ControllerBase
 {
     private readonly IMediator _mediator;

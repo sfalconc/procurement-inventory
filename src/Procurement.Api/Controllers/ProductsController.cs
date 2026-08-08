@@ -6,11 +6,14 @@ using Procurement.Application.Products.Commands.UpdateProduct;
 using Procurement.Application.Products.DTOs;
 using Procurement.Application.Products.Queries.GetProductById;
 using Procurement.Application.Products.Queries.GetProducts;
+using Microsoft.AspNetCore.Authorization;
+using Procurement.Application.Common.Constants;
 
 namespace Procurement.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = PolicyConstants.RequirePurchaser)]
 public class ProductsController : ControllerBase
 {
     private readonly IMediator _mediator;

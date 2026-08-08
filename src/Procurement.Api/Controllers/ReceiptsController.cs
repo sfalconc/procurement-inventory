@@ -1,81 +1,52 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Procurement.Application.Common.Interfaces;
+using Procurement.Application.Receipts.DTOs;
+using Procurement.Application.Receipts.Queries.GetReceipts;
+using Procurement.Application.Receipts.Queries.GetReceiptById;
+using Microsoft.AspNetCore.Authorization;
+using Procurement.Application.Common.Constants;
 
 namespace Procurement.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = PolicyConstants.RequireWarehouse)]
 public class ReceiptsController : ControllerBase
 {
-    private readonly IApplicationDbContext _context;
-
+    private readonly IMediator _mediator;
 
     public ReceiptsController(
-        IApplicationDbContext context)
+        IMediator mediator)
     {
-        _context = context;
+        _mediator = mediator;
     }
 
-
     [HttpGet]
-    public async Task<IActionResult> GetAll(
+    public async Task<ActionResult<IEnumerable<ReceiptResponse>>> GetAll(
         CancellationToken cancellationToken)
     {
-        var receipts = await _context.Receipts
-            .Include(r => r.Lines)
-            .Select(r => new
-            {
-                r.Id,
-                r.PurchaseOrderId,
-                r.ReceivedDate,
-
-                Lines = r.Lines
-                    .Select(line => new
-                    {
-                        line.PurchaseOrderLineId,
-                        line.QuantityReceived
-                    })
-                    .ToList()
-            })
-            .ToListAsync(cancellationToken);
-
+        var receipts = await _mediator.Send(
+            new GetReceiptsQuery(),
+            cancellationToken);
 
         return Ok(receipts);
     }
 
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(
+    public async Task<ActionResult<ReceiptResponse>> GetById(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var receipt = await _context.Receipts
-            .Include(r => r.Lines)
-            .Where(r => r.Id == id)
-            .Select(r => new
-            {
-                r.Id,
-                r.PurchaseOrderId,
-                r.ReceivedDate,
+        var receipt = await _mediator.Send(
+            new GetReceiptByIdQuery(id),
+            cancellationToken);
 
-                Lines = r.Lines
-                    .Select(line => new
-                    {
-                        line.PurchaseOrderLineId,
-                        line.QuantityReceived
-                    })
-                    .ToList()
-            })
-            .FirstOrDefaultAsync(cancellationToken);
-
-
-        if (receipt == null)
+        if (receipt is null)
         {
             return NotFound();
         }
-
 
         return Ok(receipt);
     }
