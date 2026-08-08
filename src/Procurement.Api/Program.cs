@@ -13,6 +13,8 @@ using Procurement.Application.Common.Interfaces;
 using Procurement.Application.Extensions;
 
 using Procurement.Infrastructure;
+using Procurement.Infrastructure.Persistence.Seed;
+using Procurement.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,6 +99,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<ProcurementDbContext>();
+
+    await ProcurementDbContextSeed.SeedAsync(context);
+}
 
 if (app.Environment.IsDevelopment())
 {
