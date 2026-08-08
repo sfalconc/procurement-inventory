@@ -10,8 +10,6 @@ namespace Procurement.IntegrationTests.Common;
 public class TestAuthenticationHandler 
     : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    public static string? Role { get; set; } = "Warehouse";
-
 
     public TestAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -24,15 +22,15 @@ public class TestAuthenticationHandler
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var role = Role;
-
-
-        if (string.IsNullOrEmpty(role))
+        if (!Request.Headers.TryGetValue(
+                "X-Test-Role",
+                out var roleHeader))
         {
             return Task.FromResult(
                 AuthenticateResult.NoResult());
         }
 
+        var role = roleHeader.ToString();
 
         var claims = new[]
         {
@@ -45,19 +43,16 @@ public class TestAuthenticationHandler
                 role)
         };
 
-
         var identity = new ClaimsIdentity(
             claims,
             "Test");
 
-
-        var principal = new ClaimsPrincipal(identity);
-
+        var principal = new ClaimsPrincipal(
+            identity);
 
         var ticket = new AuthenticationTicket(
             principal,
             "Test");
-
 
         return Task.FromResult(
             AuthenticateResult.Success(ticket));
