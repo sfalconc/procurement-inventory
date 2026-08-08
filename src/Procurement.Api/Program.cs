@@ -3,6 +3,7 @@ using System.Text;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 
 using Procurement.Api.Authentication;
 using Procurement.Api.Middleware;
@@ -23,14 +24,13 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddApplication();
 
-
 builder.Services.AddControllers();
 
+builder.Services.AddHealthChecks();
 
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
 
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
@@ -96,13 +96,14 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider
         .GetRequiredService<ProcurementDbContext>();
+
+    await context.Database.MigrateAsync();
 
     await ProcurementDbContextSeed.SeedAsync(context);
 }
@@ -128,6 +129,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHealthChecks("/health");
 
 app.Run();
 
