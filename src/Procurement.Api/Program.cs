@@ -2,9 +2,9 @@ using System.Security.Claims;
 using System.Text;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 
 using Procurement.Api.Authentication;
 using Procurement.Api.Middleware;
@@ -15,8 +15,8 @@ using Procurement.Application.Common.Interfaces;
 using Procurement.Application.Extensions;
 
 using Procurement.Infrastructure;
-using Procurement.Infrastructure.Persistence.Seed;
 using Procurement.Infrastructure.Persistence;
+using Procurement.Infrastructure.Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,12 +32,8 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-builder.Services.Configure<JwtSettings>(
-    builder.Configuration.GetSection("JwtSettings"));
-
 var jwtSettings = builder.Configuration
-    .GetSection("JwtSettings")
-    .Get<JwtSettings>()!;
+    .GetSection("JwtSettings");
 
 builder.Services.AddAuthentication(
     JwtBearerDefaults.AuthenticationScheme)
@@ -51,13 +47,13 @@ builder.Services.AddAuthentication(
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
 
-                ValidIssuer = jwtSettings.Issuer,
-                ValidAudience = jwtSettings.Audience,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(
-                            jwtSettings.SecretKey)),
+                            jwtSettings["SecretKey"]!)),
 
                 RoleClaimType = ClaimTypes.Role
             };
@@ -89,7 +85,20 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Enter your JWT token."
+        });
+});
 
 var app = builder.Build();
 
@@ -116,7 +125,6 @@ if (!app.Environment.IsEnvironment("Testing"))
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-
     app.UseSwaggerUI();
 }
 
