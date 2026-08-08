@@ -1,64 +1,66 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Data.Sqlite;
 
 using Procurement.Infrastructure.Persistence;
 
 namespace Procurement.IntegrationTests.Common;
 
-public class CustomWebApplicationFactory 
+public class CustomWebApplicationFactory
     : WebApplicationFactory<Program>
 {
-    private SqliteConnection? _connection;
+    private readonly string _databasePath;
 
+    public CustomWebApplicationFactory()
+    {
+        _databasePath = Path.Combine(
+            Path.GetTempPath(),
+            $"ProcurementTests_{Guid.NewGuid():N}.db");
+    }
 
     protected override void ConfigureWebHost(
-        Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
+        IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Testing");
+
         builder.ConfigureServices(services =>
         {
             var descriptor = services
                 .SingleOrDefault(d =>
-                    d.ServiceType == typeof(DbContextOptions<ProcurementDbContext>));
-
+                    d.ServiceType ==
+                    typeof(DbContextOptions<ProcurementDbContext>));
 
             if (descriptor != null)
             {
                 services.Remove(descriptor);
             }
 
-
-            _connection = new SqliteConnection(
-                "DataSource=:memory:");
-
-            _connection.Open();
-
-
             services.AddDbContext<ProcurementDbContext>(
                 options =>
                 {
-                    options.UseSqlite(_connection);
+                    options.UseSqlite(
+                        $"Data Source={_databasePath}");
                 });
-
 
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "Test";
                 options.DefaultChallengeScheme = "Test";
             })
-            .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
+            .AddScheme<
+                AuthenticationSchemeOptions,
+                TestAuthenticationHandler>(
                 "Test",
                 options =>
                 {
                 });
 
+            var serviceProvider = services.BuildServiceProvider();
 
-            var provider = services.BuildServiceProvider();
-
-
-            using var scope = provider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
 
             var context = scope.ServiceProvider
                 .GetRequiredService<ProcurementDbContext>();
@@ -67,11 +69,13 @@ public class CustomWebApplicationFactory
         });
     }
 
-
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
 
-        _connection?.Dispose();
+        if (File.Exists(_databasePath))
+        {
+            File.Delete(_databasePath);
+        }
     }
 }

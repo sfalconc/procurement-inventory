@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 using Procurement.Api.Authentication;
 using Procurement.Api.Middleware;
@@ -18,7 +19,6 @@ using Procurement.Infrastructure.Persistence.Seed;
 using Procurement.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -35,11 +35,9 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
 
-
 var jwtSettings = builder.Configuration
     .GetSection("JwtSettings")
     .Get<JwtSettings>()!;
-
 
 builder.Services.AddAuthentication(
     JwtBearerDefaults.AuthenticationScheme)
@@ -58,12 +56,12 @@ builder.Services.AddAuthentication(
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                        Encoding.UTF8.GetBytes(
+                            jwtSettings.SecretKey)),
 
                 RoleClaimType = ClaimTypes.Role
             };
     });
-
 
 builder.Services.AddAuthorization(options =>
 {
@@ -74,14 +72,12 @@ builder.Services.AddAuthorization(options =>
             policy.RequireRole(RoleConstants.Admin);
         });
 
-
     options.AddPolicy(
         PolicyConstants.RequirePurchaser,
         policy =>
         {
             policy.RequireRole(RoleConstants.Purchaser);
         });
-
 
     options.AddPolicy(
         PolicyConstants.RequireWarehouse,
@@ -91,21 +87,30 @@ builder.Services.AddAuthorization(options =>
         });
 });
 
-
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var context = scope.ServiceProvider
-        .GetRequiredService<ProcurementDbContext>();
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider
+            .GetRequiredService<ProcurementDbContext>();
 
-    await context.Database.MigrateAsync();
+        if (context.Database.IsSqlServer())
+        {
+            await context.Database.MigrateAsync();
+        }
+        else
+        {
+            await context.Database.EnsureCreatedAsync();
+        }
 
-    await ProcurementDbContextSeed.SeedAsync(context);
+        await ProcurementDbContextSeed.SeedAsync(context);
+    }
 }
 
 if (app.Environment.IsDevelopment())
@@ -115,24 +120,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
 app.UseHttpsRedirection();
 
-
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-
 
 app.UseAuthentication();
 
 app.UseAuthorization();
-
 
 app.MapControllers();
 
 app.MapHealthChecks("/health");
 
 app.Run();
-
 
 public partial class Program
 {
