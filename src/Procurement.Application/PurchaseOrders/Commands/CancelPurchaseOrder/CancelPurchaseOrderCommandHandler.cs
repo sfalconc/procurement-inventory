@@ -45,8 +45,7 @@ public class CancelPurchaseOrderCommandHandler
         }
 
 
-        purchaseOrder.SetStatus(
-            PurchaseOrderStatus.Cancelled);
+        purchaseOrder.Cancel();
 
 
         await _context.SaveChangesAsync(

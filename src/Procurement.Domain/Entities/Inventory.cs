@@ -4,15 +4,15 @@ namespace Procurement.Domain.Entities;
 
 public class Inventory : BaseEntity
 {
-    public Guid ProductId { get; set; }
+    public Guid ProductId { get; private set; }
 
-    public int CurrentQuantity { get; set; }
+    public int CurrentQuantity { get; private set; }
 
     public int MinimumStock { get; private set; }
 
     public decimal AverageUnitCost { get; private set; }
 
-    public Product Product { get; set; } = null!;
+    public Product Product { get; private set; } = null!;
 
     public ICollection<InventoryMovement> Movements { get; private set; } = new List<InventoryMovement>();
 

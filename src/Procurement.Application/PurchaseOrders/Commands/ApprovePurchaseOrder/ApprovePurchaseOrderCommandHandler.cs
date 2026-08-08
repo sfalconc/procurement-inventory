@@ -45,8 +45,7 @@ public class ApprovePurchaseOrderCommandHandler
         }
 
 
-        purchaseOrder.SetStatus(
-            PurchaseOrderStatus.Approved);
+        purchaseOrder.Approve();
 
 
         await _context.SaveChangesAsync(

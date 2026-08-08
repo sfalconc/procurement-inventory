@@ -44,8 +44,7 @@ public class RejectPurchaseOrderCommandHandler
         }
 
 
-        purchaseOrder.SetStatus(
-            PurchaseOrderStatus.Rejected);
+        purchaseOrder.Reject();
 
 
         await _context.SaveChangesAsync(

@@ -103,12 +103,14 @@ public class ReceivePurchaseOrderCommandHandler
         var fullyReceived = purchaseOrder.Lines
             .All(x => x.QuantityReceived == x.Quantity);
 
-
-        purchaseOrder.SetStatus(
-            fullyReceived
-                ? PurchaseOrderStatus.Completed
-                : PurchaseOrderStatus.PartiallyReceived);
-
+        if (fullyReceived)
+        {
+            purchaseOrder.MarkAsCompleted();
+        }
+        else
+        {
+            purchaseOrder.MarkAsPartiallyReceived();
+        }
 
         await _context.SaveChangesAsync(
             cancellationToken);

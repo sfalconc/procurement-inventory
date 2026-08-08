@@ -62,54 +62,7 @@ public class PurchaseOrder : BaseEntity
 
         Status = PurchaseOrderStatus.Completed;
     }
-
-    public void SetStatus(
-        PurchaseOrderStatus status)
-    {
-        if (!CanChangeStatus(status))
-        {
-            throw new InvalidOperationException(
-                $"Cannot change purchase order status from {Status} to {status}.");
-        }
-
-        Status = status;
-    }
-
-    private bool CanChangeStatus(
-        PurchaseOrderStatus newStatus)
-    {
-        return Status switch
-        {
-            PurchaseOrderStatus.Draft =>
-                newStatus == PurchaseOrderStatus.PendingApproval ||
-                newStatus == PurchaseOrderStatus.Cancelled,
-
-            PurchaseOrderStatus.PendingApproval =>
-                newStatus == PurchaseOrderStatus.Approved ||
-                newStatus == PurchaseOrderStatus.Rejected ||
-                newStatus == PurchaseOrderStatus.Cancelled,
-
-            PurchaseOrderStatus.Approved =>
-                newStatus == PurchaseOrderStatus.PartiallyReceived ||
-                newStatus == PurchaseOrderStatus.Completed ||
-                newStatus == PurchaseOrderStatus.Cancelled,
-
-            PurchaseOrderStatus.PartiallyReceived =>
-                newStatus == PurchaseOrderStatus.Completed ||
-                newStatus == PurchaseOrderStatus.Cancelled,
-
-            PurchaseOrderStatus.Completed =>
-                false,
-
-            PurchaseOrderStatus.Rejected =>
-                false,
-
-            PurchaseOrderStatus.Cancelled =>
-                false,
-
-            _ => false
-        };
-    }
+    
     public void UpdateSupplier(Guid supplierId)
     {
         SupplierId = supplierId;
