@@ -23,6 +23,9 @@ public interface IApplicationDbContext
     DbSet<Receipt> Receipts { get; }
 
     DbSet<ReceiptLine> ReceiptLines { get; }
+
+    DbSet<User> Users { get; }
+    
     Task<int> SaveChangesAsync(
         CancellationToken cancellationToken);
 }

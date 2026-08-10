@@ -33,6 +33,8 @@ public class ProcurementDbContext : DbContext, IApplicationDbContext
     public DbSet<Receipt> Receipts => Set<Receipt>();
 
     public DbSet<ReceiptLine> ReceiptLines => Set<ReceiptLine>();
+    
+    public DbSet<User> Users => Set<User>();
     public override async Task<int> SaveChangesAsync(
         CancellationToken cancellationToken = default)
     {

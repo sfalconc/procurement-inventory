@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
+
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 using Procurement.Infrastructure.Persistence;
 
@@ -21,53 +23,86 @@ public class CustomWebApplicationFactory
             $"ProcurementTests_{Guid.NewGuid():N}.db");
     }
 
-    protected override void ConfigureWebHost(
-        IWebHostBuilder builder)
-    {
-        builder.UseEnvironment("Testing");
+protected override void ConfigureWebHost(
+    IWebHostBuilder builder)
+{
+    builder.UseEnvironment("Testing");
 
-        builder.ConfigureServices(services =>
+    builder.ConfigureAppConfiguration(
+        (_, config) =>
         {
-            var descriptor = services
-                .SingleOrDefault(d =>
-                    d.ServiceType ==
-                    typeof(DbContextOptions<ProcurementDbContext>));
-
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
-
-            services.AddDbContext<ProcurementDbContext>(
-                options =>
+            config.AddInMemoryCollection(
+                new Dictionary<string, string?>
                 {
-                    options.UseSqlite(
-                        $"Data Source={_databasePath}");
-                });
+                    ["JwtSettings:SecretKey"] =
+                        "7f4a9c2e8d1b6f3a5e9c0d7a2b8f4e6c1a9d5f7b3e8c2a6",
 
-            services.AddAuthentication(options =>
+                    ["JwtSettings:Issuer"] =
+                        "Procurement.Api",
+
+                    ["JwtSettings:Audience"] =
+                        "Procurement.Client",
+
+                    ["JwtSettings:ExpirationMinutes"] =
+                        "120"
+                });
+        });
+
+    builder.ConfigureServices(services =>
+    {
+        var descriptor = services
+            .SingleOrDefault(d =>
+                d.ServiceType ==
+                typeof(DbContextOptions<ProcurementDbContext>));
+
+        if (descriptor != null)
+        {
+            services.Remove(descriptor);
+        }
+
+        services.AddDbContext<ProcurementDbContext>(
+            options =>
             {
-                options.DefaultAuthenticateScheme = "Test";
-                options.DefaultChallengeScheme = "Test";
+                options.UseSqlite(
+                    $"Data Source={_databasePath}");
+            });
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = "TestOrBearer";
+            options.DefaultChallengeScheme = "TestOrBearer";
+        })
+        .AddPolicyScheme(
+            "TestOrBearer",
+            "Test or Bearer",
+            options =>
+            {
+                options.ForwardDefaultSelector =
+                    context =>
+                        context.Request.Headers
+                            .ContainsKey("Authorization")
+                            ? "Bearer"
+                            : "Test";
             })
-            .AddScheme<
-                AuthenticationSchemeOptions,
-                TestAuthenticationHandler>(
-                "Test",
-                options =>
-                {
-                });
+        .AddScheme<
+            AuthenticationSchemeOptions,
+            TestAuthenticationHandler>(
+            "Test",
+            _ => { });
 
-            var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider =
+            services.BuildServiceProvider();
 
-            using var scope = serviceProvider.CreateScope();
+        using var scope =
+            serviceProvider.CreateScope();
 
-            var context = scope.ServiceProvider
+        var context =
+            scope.ServiceProvider
                 .GetRequiredService<ProcurementDbContext>();
 
-            context.Database.EnsureCreated();
-        });
-    }
+        context.Database.EnsureCreated();
+    });
+}
 
     protected override void Dispose(bool disposing)
     {

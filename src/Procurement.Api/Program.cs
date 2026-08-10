@@ -14,7 +14,7 @@ using Procurement.Application.Common.Constants;
 using Procurement.Application.Common.Interfaces;
 using Procurement.Application.Extensions;
 
-using Procurement.Infrastructure;
+using Procurement.Infrastructure.Extensions;
 using Procurement.Infrastructure.Persistence;
 using Procurement.Infrastructure.Persistence.Seed;
 
@@ -98,6 +98,14 @@ builder.Services.AddSwaggerGen(options =>
             In = ParameterLocation.Header,
             Description = "Enter your JWT token."
         });
+
+    options.AddSecurityRequirement(
+        document =>
+            new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Bearer", document)] =
+                    new List<string>()
+            });
 });
 
 var app = builder.Build();
@@ -118,7 +126,12 @@ if (!app.Environment.IsEnvironment("Testing"))
             await context.Database.EnsureCreatedAsync();
         }
 
-        await ProcurementDbContextSeed.SeedAsync(context);
+        var passwordHasher =
+            scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+
+        await ProcurementDbContextSeed.SeedAsync(
+            context,
+            passwordHasher);
     }
 }
 

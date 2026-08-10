@@ -1,0 +1,48 @@
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Procurement.Application.Authentication.DTOs;
+using Procurement.Application.Common.Interfaces;
+
+namespace Procurement.Application.Authentication.Commands.Login;
+
+public class LoginCommandHandler
+    : IRequestHandler<LoginCommand, LoginResponse>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IJwtTokenGenerator _jwtTokenGenerator;
+
+    public LoginCommandHandler(
+        IApplicationDbContext context,
+        IPasswordHasher passwordHasher,
+        IJwtTokenGenerator jwtTokenGenerator)
+    {
+        _context = context;
+        _passwordHasher = passwordHasher;
+        _jwtTokenGenerator = jwtTokenGenerator;
+    }
+
+    public async Task<LoginResponse> Handle(
+        LoginCommand request,
+        CancellationToken cancellationToken)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(
+                u => u.Username == request.Username &&
+                     u.IsActive,
+                cancellationToken);
+
+        if (user is null ||
+            !_passwordHasher.VerifyPassword(
+                request.Password,
+                user.PasswordHash))
+        {
+            throw new UnauthorizedAccessException(
+                "Invalid username or password.");
+        }
+
+        var token = _jwtTokenGenerator.GenerateToken(user);
+
+        return new LoginResponse(token);
+    }
+}
