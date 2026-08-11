@@ -35,17 +35,7 @@ This project corresponds to the MVP of a procurement and inventory management pl
 
 The solution follows Clean Architecture, separating business rules from infrastructure and delivery concerns.
 
-```text
-src/
-├── Procurement.Api
-├── Procurement.Application
-├── Procurement.Domain
-└── Procurement.Infrastructure
-
-tests/
-├── Procurement.UnitTests
-└── Procurement.IntegrationTests
-```
+<img src="docs/images/project-structure.png" alt="Project structure" width="30%"/>
 
 ### Main Layers
 
@@ -164,6 +154,10 @@ Swagger UI can be used to test authenticated endpoints.
 6. Click **Authorize**.
 7. Execute the protected endpoints. Swagger will automatically include the JWT in the Authorization header.
 
+<img src="docs/images/swagger-api.png" alt="Swagger API" width="85%"/>
+
+<img src="docs/images/swagger-products.png" alt="SAuthenticated Products API" width="85%"/>
+
 ### JWT Configuration
 
 JWT configuration is provided through environment-specific configuration. The secret key is intentionally not stored in `appsettings.json` or committed to Git. The configuration includes:
@@ -218,6 +212,8 @@ Environment specific configuration is provided through .NET User Secrets and env
 
 The local environment consists of the ASP.NET Core API and SQL Server.
 
+<img src="docs/images/docker-compose.png" alt="Docker Compose" width="85%"/>
+
 Start the environment with:
 
 ```bash
@@ -239,6 +235,8 @@ _SQL Server data is persisted through a Docker volume._
 ## CI (Continuous Integration)
 
 The project uses GitHub Actions for continuous integration. The CI workflow restores dependencies, builds the solution, and executes the automated test suite.
+
+<img src="docs/images/github-actions.png" alt="GitHub Actions" width="85%"/>
 
 ## Development Practices
 
