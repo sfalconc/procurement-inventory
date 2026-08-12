@@ -16,8 +16,9 @@ public static class DependencyInjection
     {
         services.AddDbContext<ProcurementDbContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection")));
-
+                configuration.GetConnectionString("DefaultConnection"),
+                sqlOptions => sqlOptions.EnableRetryOnFailure()));
+                
         services.AddScoped<IApplicationDbContext, ProcurementDbContext>();
                 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
