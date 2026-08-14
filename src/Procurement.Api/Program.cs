@@ -138,7 +138,7 @@ if (!app.Environment.IsEnvironment("Testing"))
     }
 }
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
