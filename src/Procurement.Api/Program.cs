@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
+using Procurement.Api.Exceptions;
 using Procurement.Api.Authentication;
-using Procurement.Api.Middleware;
 using Procurement.Api.Services;
 
 using Procurement.Application.Common.Constants;
@@ -108,6 +108,9 @@ builder.Services.AddSwaggerGen(options =>
             });
 });
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 if (!app.Environment.IsEnvironment("Testing"))
@@ -143,7 +146,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseExceptionHandler();
 
 app.UseAuthentication();
 
@@ -152,6 +155,11 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHealthChecks("/health");
+
+if (app.Environment.IsEnvironment("Testing"))
+{
+    app.MapGet("/api/force-error", () => { throw new Exception("Secret Info"); });
+}
 
 app.Run();
 
