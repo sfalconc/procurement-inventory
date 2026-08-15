@@ -1,3 +1,5 @@
+using Azure.Identity;
+
 using System.Security.Claims;
 using System.Text;
 
@@ -19,6 +21,18 @@ using Procurement.Infrastructure.Persistence;
 using Procurement.Infrastructure.Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (!builder.Environment.IsDevelopment())
+{
+    var keyVaultUri = builder.Configuration["KeyVaultUri"];
+    
+    if (!string.IsNullOrEmpty(keyVaultUri))
+    {
+        builder.Configuration.AddAzureKeyVault(
+            new Uri(keyVaultUri),
+            new DefaultAzureCredential());
+    }
+}
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
