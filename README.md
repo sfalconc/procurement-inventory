@@ -154,27 +154,46 @@ Swagger UI can be used to test authenticated endpoints.
 6. Click **Authorize**.
 7. Execute the protected endpoints. Swagger will automatically include the JWT in the Authorization header.
 
-<img src="docs/images/swagger-api.png" alt="Swagger API" width="85%"/>
+<img src="docs/images/swagger-api.png" alt="Swagger API" width="95%"/>
 
-<img src="docs/images/swagger-products.png" alt="SAuthenticated Products API" width="85%"/>
-
-### JWT Configuration
-
-JWT configuration is provided through environment-specific configuration. The secret key is intentionally not stored in `appsettings.json` or committed to Git. The configuration includes:
-
-- `SecretKey`
-- `Issuer`
-- `Audience`
-- `ExpirationMinutes`
-
-**Local Development:** Local secrets are stored using .NET User Secrets.
-**Docker Environment:** Docker Compose provides the JWT signing secret through the `JWT_SECRET_KEY` environment variable.
-
-The API validates the Issuer, Audience, Token lifetime, and Signing key.
+<img src="docs/images/swagger-products.png" alt="SAuthenticated Products API" width="95%"/>
 
 ### Current User and Auditing
 
 The application provides a `CurrentUserService` for accessing information about the authenticated user through `HttpContext`. Authenticated user information is used for auditing, including fields such as `CreatedBy`, `UpdatedBy`, and `UpdatedAt`.
+
+## Security & Secrets Management
+
+### JWT & Secrets Management Strategy
+
+Authentication is implemented using JWT bearer tokens. The API validates the token issuer, audience, lifetime, and signing key.
+
+JWT configuration is loaded through the standard .NET configuration pipeline. The signing key is intentionally excluded from source control and is not stored in `appsettings.json`.
+
+The application uses environment-specific configuration for sensitive values:
+
+- **Local Execution:** The API can run directly on the development machine using local configuration. Sensitive configuration is excluded from source control.
+- **Docker:** Containerized local execution uses environment variables defined through `docker-compose.yml` and a local `.env` file. The `.env` file is excluded from source control.
+- **Azure:** Azure Key Vault is added as a configuration provider during application startup when a `KeyVaultUri` is configured.
+- **Authentication:** The application uses `DefaultAzureCredential()` to authenticate with Azure Key Vault. In Azure, the App Service uses a System-Assigned Managed Identity authorized through Azure RBAC.
+- **Runtime Configuration:** Secrets retrieved from Key Vault become part of the application's standard configuration pipeline _before_ infrastructure services and JWT authentication are registered. This makes the resolved configuration available to services that require it during application startup and runtime.
+
+## Cloud Deployment (Azure)
+
+The application is deployed to Microsoft Azure using managed services for API hosting, relational data persistence, and secure secrets management.
+
+### Azure Resources
+
+- **Azure App Service:** Hosts the .NET 8 Web API.
+- **Azure SQL Database:** Managed relational database for application data persistence.
+- **Azure Key Vault:** Secure storage and runtime configuration of sensitive application secrets.
+
+### Deployment Evidence
+
+- **Live API (Swagger):** [Swagger UI - Procurement API](https://procurement-inventory-sf-bmawd3c2a7fuh4a0.southeastasia-01.azurewebsites.net/swagger/index.html)
+- **Live Health Check:** [API Health Status](https://procurement-inventory-sf-bmawd3c2a7fuh4a0.southeastasia-01.azurewebsites.net/health)
+
+<img src="docs/images/azure-resources.png" alt="Azure Resources" width="95%"/>
 
 ## Testing, Authentication, and Authorization
 
@@ -212,7 +231,7 @@ Environment specific configuration is provided through .NET User Secrets and env
 
 The local environment consists of the ASP.NET Core API and SQL Server.
 
-<img src="docs/images/docker-compose.png" alt="Docker Compose" width="85%"/>
+<img src="docs/images/docker-compose.png" alt="Docker Compose" width="95%"/>
 
 Start the environment with:
 
@@ -236,7 +255,7 @@ _SQL Server data is persisted through a Docker volume._
 
 The project uses GitHub Actions for continuous integration. The CI workflow restores dependencies, builds the solution, and executes the automated test suite.
 
-<img src="docs/images/github-actions.png" alt="GitHub Actions" width="85%"/>
+<img src="docs/images/github-actions.png" alt="GitHub Actions" width="95%"/>
 
 ## Development Practices
 
