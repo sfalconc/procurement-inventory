@@ -66,4 +66,17 @@ public class ProductsTests
             HttpStatusCode.NotFound,
             response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetProducts_ShouldAllowSuperUserRole()
+    {
+        AuthenticateAs(RoleConstants.SuperUser);
+
+        var response = await _client.GetAsync(
+            "/api/products");
+
+        Assert.Equal(
+            HttpStatusCode.OK,
+            response.StatusCode);
+    }
 }

@@ -61,12 +61,12 @@ public class JwtAuthenticationTests
     public async Task ProtectedEndpoint_ShouldReturnForbidden_WithValidJwtAndUnauthorizedRole()
     {
         var token = await LoginAsync(
-            "jwt-admin",
+            "jwt-warehouse",
             "Password123!",
-            UserRole.Admin);
+            UserRole.Warehouse);
 
         _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue(
+            new System.Net.Http.Headers.AuthenticationHeaderValue(
                 "Bearer",
                 token);
 

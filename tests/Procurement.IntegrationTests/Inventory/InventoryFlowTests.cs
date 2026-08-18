@@ -76,4 +76,17 @@ public class InventoryFlowTests
             HttpStatusCode.Forbidden,
             response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetInventory_ShouldAllowSuperUserRole()
+    {
+        AuthenticateAs(RoleConstants.SuperUser);
+
+        var response = await _client.GetAsync(
+            "/api/inventory");
+
+        Assert.Equal(
+            HttpStatusCode.OK,
+            response.StatusCode);
+    }
 }

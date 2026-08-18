@@ -21,8 +21,6 @@ public static class ProcurementDbContextSeed
 
         var random = new Random();
 
-        // Categories
-
         var categories = new List<Category>
         {
             new(
@@ -49,8 +47,6 @@ public static class ProcurementDbContextSeed
         await context.Categories.AddRangeAsync(categories);
         await context.SaveChangesAsync();
 
-        // Suppliers
-
         var supplierFaker = new Faker<Supplier>()
             .CustomInstantiator(f =>
                 new Supplier(
@@ -66,8 +62,6 @@ public static class ProcurementDbContextSeed
         await context.Suppliers.AddRangeAsync(suppliers);
         await context.SaveChangesAsync();
 
-        // Products
-
         var productFaker = new Faker<Product>()
             .CustomInstantiator(f =>
                 new Product(
@@ -80,8 +74,6 @@ public static class ProcurementDbContextSeed
 
         await context.Products.AddRangeAsync(products);
         await context.SaveChangesAsync();
-
-        // Inventory
 
         var inventories = products
             .Select(product =>
@@ -100,8 +92,6 @@ public static class ProcurementDbContextSeed
 
         await context.Inventories.AddRangeAsync(inventories);
         await context.SaveChangesAsync();
-
-        // Purchase Orders
 
         var purchaseOrders = new List<PurchaseOrder>();
 
@@ -136,50 +126,49 @@ public static class ProcurementDbContextSeed
         await context.SaveChangesAsync();
     }
 
-private static async Task SeedUserAsync(
-    ProcurementDbContext context,
-    IPasswordHasher passwordHasher)
-{
-    await CreateUserIfNotExistsAsync(
-        context,
-        passwordHasher,
-        "admin",
-        "Admin123!",
-        UserRole.Admin);
-
-    await CreateUserIfNotExistsAsync(
-        context,
-        passwordHasher,
-        "purchaser",
-        "Purchaser123!",
-        UserRole.Purchaser);
-}
-
-private static async Task CreateUserIfNotExistsAsync(
-    ProcurementDbContext context,
-    IPasswordHasher passwordHasher,
-    string username,
-    string password,
-    UserRole role)
-{
-    var userExists = await context.Users
-        .AnyAsync(u => u.Username == username);
-
-    if (userExists)
+    private static async Task SeedUserAsync(
+        ProcurementDbContext context,
+        IPasswordHasher passwordHasher)
     {
-        return;
+        await CreateUserIfNotExistsAsync(
+            context,
+            passwordHasher,
+            "superuser",
+            "SuperUser123!",
+            UserRole.SuperUser);
+
+        await CreateUserIfNotExistsAsync(
+            context,
+            passwordHasher,
+            "purchaser",
+            "Purchaser123!",
+            UserRole.Purchaser);
     }
 
-    var passwordHash =
-        passwordHasher.HashPassword(password);
+    private static async Task CreateUserIfNotExistsAsync(
+        ProcurementDbContext context,
+        IPasswordHasher passwordHasher,
+        string username,
+        string password,
+        UserRole role)
+    {
+        var userExists = await context.Users
+            .AnyAsync(u => u.Username == username);
 
-    var user = new User(
-        username,
-        passwordHash,
-        role);
+        if (userExists)
+        {
+            return;
+        }
 
-    await context.Users.AddAsync(user);
-    await context.SaveChangesAsync();
-}
+        var passwordHash =
+            passwordHasher.HashPassword(password);
 
+        var user = new User(
+            username,
+            passwordHash,
+            role);
+
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
+    }
 }

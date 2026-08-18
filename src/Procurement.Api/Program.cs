@@ -76,24 +76,24 @@ builder.Services.AddAuthentication(
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(
-        PolicyConstants.RequireAdmin,
+        PolicyConstants.RequireSuperUser,
         policy =>
         {
-            policy.RequireRole(RoleConstants.Admin);
+            policy.RequireRole(RoleConstants.SuperUser);
         });
 
     options.AddPolicy(
         PolicyConstants.RequirePurchaser,
         policy =>
         {
-            policy.RequireRole(RoleConstants.Purchaser);
+            policy.RequireRole(RoleConstants.Purchaser, RoleConstants.SuperUser);
         });
 
     options.AddPolicy(
         PolicyConstants.RequireWarehouse,
         policy =>
         {
-            policy.RequireRole(RoleConstants.Warehouse);
+            policy.RequireRole(RoleConstants.Warehouse, RoleConstants.SuperUser);
         });
 });
 
