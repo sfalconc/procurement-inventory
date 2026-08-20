@@ -44,56 +44,54 @@ jobs:
           name: webapp-artifact
           path: ./publish
 
-  deploy-staging:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.event_name == 'push'
-    environment:
-      name: Staging
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: webapp-artifact
-          path: .
+deploy-staging:
+  runs-on: ubuntu-latest
+  needs: build-and-test
+  if: github.event_name == 'push'
+  environment:
+    name: Staging
+  steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: webapp-artifact
+        path: .
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: "procurement-inventory-sf"
-          slot-name: "Staging"
-          package: .
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: "procurement-inventory-sf-staging"
+        package: .
 
-  deploy-production:
-    runs-on: ubuntu-latest
-    needs: deploy-staging
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment:
-      name: Production
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: webapp-artifact
-          path: .
+deploy-production:
+  runs-on: ubuntu-latest
+  needs: deploy-staging
+  if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  environment:
+    name: Production
+  steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: webapp-artifact
+        path: .
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: "procurement-inventory-sf"
-          slot-name: "Production"
-          package: .
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: "procurement-inventory-sf"
+        package: .
