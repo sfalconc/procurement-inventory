@@ -1,0 +1,382 @@
+{
+  "version": 1,
+  "parameters": "--include-transitive",
+  "projects": [
+    {
+      "path": "/Users/Stefi/Portafolio/procurement-inventory/src/Procurement.Api/Procurement.Api.csproj",
+      "frameworks": [
+        {
+          "framework": "net8.0",
+          "topLevelPackages": [
+            {
+              "id": "AspNetCore.HealthChecks.SqlServer",
+              "requestedVersion": "8.0.2",
+              "resolvedVersion": "8.0.2"
+            },
+            {
+              "id": "Azure.Extensions.AspNetCore.Configuration.Secrets",
+              "requestedVersion": "1.5.1",
+              "resolvedVersion": "1.5.1"
+            },
+            {
+              "id": "Azure.Identity",
+              "requestedVersion": "1.21.0",
+              "resolvedVersion": "1.21.0"
+            },
+            {
+              "id": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "requestedVersion": "8.0.8",
+              "resolvedVersion": "8.0.8"
+            },
+            {
+              "id": "Microsoft.AspNetCore.OpenApi",
+              "requestedVersion": "8.0.8",
+              "resolvedVersion": "8.0.8"
+            },
+            {
+              "id": "Microsoft.EntityFrameworkCore.Design",
+              "requestedVersion": "8.0.18",
+              "resolvedVersion": "8.0.18"
+            },
+            {
+              "id": "Microsoft.Extensions.Diagnostics.HealthChecks",
+              "requestedVersion": "8.0.0",
+              "resolvedVersion": "8.0.0"
+            },
+            {
+              "id": "Swashbuckle.AspNetCore",
+              "requestedVersion": "10.2.3",
+              "resolvedVersion": "10.2.3"
+            }
+          ],
+          "transitivePackages": [
+            {
+              "id": "Azure.Core",
+              "resolvedVersion": "1.54.0"
+            },
+            {
+              "id": "Azure.Security.KeyVault.Secrets",
+              "resolvedVersion": "4.10.0"
+            },
+            {
+              "id": "Bogus",
+              "resolvedVersion": "35.6.1"
+            },
+            {
+              "id": "FluentValidation",
+              "resolvedVersion": "12.1.1"
+            },
+            {
+              "id": "FluentValidation.DependencyInjectionExtensions",
+              "resolvedVersion": "11.11.0"
+            },
+            {
+              "id": "Humanizer.Core",
+              "resolvedVersion": "2.14.1"
+            },
+            {
+              "id": "MediatR",
+              "resolvedVersion": "14.2.0"
+            },
+            {
+              "id": "MediatR.Contracts",
+              "resolvedVersion": "2.0.1"
+            },
+            {
+              "id": "Microsoft.Bcl.AsyncInterfaces",
+              "resolvedVersion": "10.0.3"
+            },
+            {
+              "id": "Microsoft.CodeAnalysis.Analyzers",
+              "resolvedVersion": "3.3.3"
+            },
+            {
+              "id": "Microsoft.CodeAnalysis.Common",
+              "resolvedVersion": "4.5.0"
+            },
+            {
+              "id": "Microsoft.CodeAnalysis.CSharp",
+              "resolvedVersion": "4.5.0"
+            },
+            {
+              "id": "Microsoft.CodeAnalysis.CSharp.Workspaces",
+              "resolvedVersion": "4.5.0"
+            },
+            {
+              "id": "Microsoft.CodeAnalysis.Workspaces.Common",
+              "resolvedVersion": "4.5.0"
+            },
+            {
+              "id": "Microsoft.Data.SqlClient",
+              "resolvedVersion": "5.2.0"
+            },
+            {
+              "id": "Microsoft.Data.SqlClient.SNI.runtime",
+              "resolvedVersion": "5.2.0"
+            },
+            {
+              "id": "Microsoft.EntityFrameworkCore",
+              "resolvedVersion": "8.0.26"
+            },
+            {
+              "id": "Microsoft.EntityFrameworkCore.Abstractions",
+              "resolvedVersion": "8.0.26"
+            },
+            {
+              "id": "Microsoft.EntityFrameworkCore.Analyzers",
+              "resolvedVersion": "8.0.26"
+            },
+            {
+              "id": "Microsoft.EntityFrameworkCore.Relational",
+              "resolvedVersion": "8.0.26"
+            },
+            {
+              "id": "Microsoft.EntityFrameworkCore.SqlServer",
+              "resolvedVersion": "8.0.26"
+            },
+            {
+              "id": "Microsoft.Extensions.ApiDescription.Server",
+              "resolvedVersion": "8.0.0"
+            },
+            {
+              "id": "Microsoft.Extensions.Caching.Abstractions",
+              "resolvedVersion": "8.0.0"
+            },
+            {
+              "id": "Microsoft.Extensions.Caching.Memory",
+              "resolvedVersion": "8.0.1"
+            },
+            {
+              "id": "Microsoft.Extensions.Configuration",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Extensions.Configuration.Abstractions",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Extensions.Configuration.FileExtensions",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Extensions.Configuration.Json",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Extensions.Configuration.UserSecrets",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Extensions.DependencyInjection",
+              "resolvedVersion": "8.0.1"
+            },
+            {
+              "id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+              "resolvedVersion": "10.0.3"
+            },
+            {
+              "id": "Microsoft.Extensions.DependencyModel",
+              "resolvedVersion": "8.0.2"
+            },
+            {
+              "id": "Microsoft.Extensions.Diagnostics.Abstractions",
+              "resolvedVersion": "10.0.3"
+            },
+            {
+              "id": "Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions",
+              "resolvedVersion": "8.0.0"
+            },
+            {
+              "id": "Microsoft.Extensions.FileProviders.Abstractions",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Extensions.FileProviders.Physical",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Extensions.FileSystemGlobbing",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Extensions.Hosting.Abstractions",
+              "resolvedVersion": "10.0.3"
+            },
+            {
+              "id": "Microsoft.Extensions.Logging",
+              "resolvedVersion": "8.0.1"
+            },
+            {
+              "id": "Microsoft.Extensions.Logging.Abstractions",
+              "resolvedVersion": "10.0.3"
+            },
+            {
+              "id": "Microsoft.Extensions.Options",
+              "resolvedVersion": "10.0.3"
+            },
+            {
+              "id": "Microsoft.Extensions.Primitives",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "Microsoft.Identity.Client",
+              "resolvedVersion": "4.83.1"
+            },
+            {
+              "id": "Microsoft.Identity.Client.Extensions.Msal",
+              "resolvedVersion": "4.83.1"
+            },
+            {
+              "id": "Microsoft.IdentityModel.Abstractions",
+              "resolvedVersion": "8.14.0"
+            },
+            {
+              "id": "Microsoft.IdentityModel.JsonWebTokens",
+              "resolvedVersion": "8.14.0"
+            },
+            {
+              "id": "Microsoft.IdentityModel.Logging",
+              "resolvedVersion": "8.14.0"
+            },
+            {
+              "id": "Microsoft.IdentityModel.Protocols",
+              "resolvedVersion": "7.1.2"
+            },
+            {
+              "id": "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+              "resolvedVersion": "7.1.2"
+            },
+            {
+              "id": "Microsoft.IdentityModel.Tokens",
+              "resolvedVersion": "8.14.0"
+            },
+            {
+              "id": "Microsoft.OpenApi",
+              "resolvedVersion": "2.7.5"
+            },
+            {
+              "id": "Microsoft.SqlServer.Server",
+              "resolvedVersion": "1.0.0"
+            },
+            {
+              "id": "Mono.TextTemplating",
+              "resolvedVersion": "2.2.1"
+            },
+            {
+              "id": "Swashbuckle.AspNetCore.Swagger",
+              "resolvedVersion": "10.2.3"
+            },
+            {
+              "id": "Swashbuckle.AspNetCore.SwaggerGen",
+              "resolvedVersion": "10.2.3"
+            },
+            {
+              "id": "Swashbuckle.AspNetCore.SwaggerUI",
+              "resolvedVersion": "10.2.3"
+            },
+            {
+              "id": "System.ClientModel",
+              "resolvedVersion": "1.10.0"
+            },
+            {
+              "id": "System.CodeDom",
+              "resolvedVersion": "4.4.0"
+            },
+            {
+              "id": "System.Collections.Immutable",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Composition",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Composition.AttributedModel",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Composition.Convention",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Composition.Hosting",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Composition.Runtime",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Composition.TypedParts",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Configuration.ConfigurationManager",
+              "resolvedVersion": "8.0.0"
+            },
+            {
+              "id": "System.Diagnostics.DiagnosticSource",
+              "resolvedVersion": "10.0.3"
+            },
+            {
+              "id": "System.Diagnostics.EventLog",
+              "resolvedVersion": "8.0.0"
+            },
+            {
+              "id": "System.Formats.Asn1",
+              "resolvedVersion": "8.0.2"
+            },
+            {
+              "id": "System.IdentityModel.Tokens.Jwt",
+              "resolvedVersion": "8.1.0"
+            },
+            {
+              "id": "System.IO.Pipelines",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "System.Memory.Data",
+              "resolvedVersion": "10.0.3"
+            },
+            {
+              "id": "System.Reflection.Metadata",
+              "resolvedVersion": "6.0.1"
+            },
+            {
+              "id": "System.Runtime.Caching",
+              "resolvedVersion": "8.0.0"
+            },
+            {
+              "id": "System.Runtime.CompilerServices.Unsafe",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Security.Cryptography.ProtectedData",
+              "resolvedVersion": "8.0.0"
+            },
+            {
+              "id": "System.Text.Encoding.CodePages",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.Text.Encodings.Web",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "System.Text.Json",
+              "resolvedVersion": "10.0.10"
+            },
+            {
+              "id": "System.Threading.Channels",
+              "resolvedVersion": "6.0.0"
+            },
+            {
+              "id": "System.ValueTuple",
+              "resolvedVersion": "4.5.0"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

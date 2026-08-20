@@ -22,7 +22,7 @@ using Procurement.Infrastructure.Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (!builder.Environment.IsDevelopment())
+if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
 {
     var keyVaultUri = builder.Configuration["KeyVaultUri"];
     
@@ -40,7 +40,8 @@ builder.Services.AddApplication();
 
 builder.Services.AddControllers();
 
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
 builder.Services.AddHttpContextAccessor();
 

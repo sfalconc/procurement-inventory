@@ -23,14 +23,17 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Clean and Restore dependencies
+        run: |
+          dotnet clean
+          dotnet nuget locals all --clear
+          dotnet restore
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
       - name: Publish
-        run: dotnet publish --no-build --configuration Release --output ./publish
+        run: dotnet publish src/Procurement.Api/Procurement.Api.csproj --no-build --configuration Release --output ./publish
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
