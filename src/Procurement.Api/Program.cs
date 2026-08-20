@@ -115,11 +115,12 @@ builder.Services.AddSwaggerGen(options =>
 
     options.AddSecurityRequirement(
         document =>
-            new OpenApiSecurityRequirement
-            {
-                [new OpenApiSecuritySchemeReference("Bearer", document)] =
-                    new List<string>()
-            });
+            new OpenApiSecuritySchemeReference("Bearer", document) == null
+                ? new OpenApiSecurityRequirement()
+                : new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
+                });
 });
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -148,13 +149,16 @@ if (!app.Environment.IsEnvironment("Testing"))
 
         await ProcurementDbContextSeed.SeedAsync(
             context,
-            passwordHasher);
+            passwordHasher,
+            app.Environment.EnvironmentName);
     }
 }
 
-app.UseSwagger();
-
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 

@@ -10,120 +10,28 @@ public static class ProcurementDbContextSeed
 {
     public static async Task SeedAsync(
         ProcurementDbContext context,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        string environmentName)
     {
         await SeedUserAsync(context, passwordHasher);
+
+        if (environmentName.Equals("Production", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
 
         if (await context.Categories.AnyAsync())
         {
             return;
         }
 
-        var random = new Random();
-
-        var categories = new List<Category>
+        if (environmentName.Equals("Staging", StringComparison.OrdinalIgnoreCase))
         {
-            new(
-                "Electronics",
-                "Electronic components and devices"),
-
-            new(
-                "Office Supplies",
-                "Office and administrative materials"),
-
-            new(
-                "Industrial Equipment",
-                "Machinery and industrial tools"),
-
-            new(
-                "Safety Equipment",
-                "Workplace safety products"),
-
-            new(
-                "Packaging",
-                "Packaging and shipping materials")
-        };
-
-        await context.Categories.AddRangeAsync(categories);
-        await context.SaveChangesAsync();
-
-        var supplierFaker = new Faker<Supplier>()
-            .CustomInstantiator(f =>
-                new Supplier(
-                    $"SUP-{f.Random.Number(1000, 9999)}",
-                    f.Company.CompanyName(),
-                    f.Random.Replace("##########"),
-                    f.Name.FullName(),
-                    f.Internet.Email(),
-                    f.Phone.PhoneNumber()));
-
-        var suppliers = supplierFaker.Generate(10);
-
-        await context.Suppliers.AddRangeAsync(suppliers);
-        await context.SaveChangesAsync();
-
-        var productFaker = new Faker<Product>()
-            .CustomInstantiator(f =>
-                new Product(
-                    $"PRD-{f.Random.Number(10000, 99999)}",
-                    f.Commerce.ProductName(),
-                    f.Commerce.ProductDescription(),
-                    f.PickRandom(categories).Id));
-
-        var products = productFaker.Generate(30);
-
-        await context.Products.AddRangeAsync(products);
-        await context.SaveChangesAsync();
-
-        var inventories = products
-            .Select(product =>
-            {
-                var inventory = new Inventory(
-                    product.Id,
-                    random.Next(5, 50),
-                    random.Next(10, 500));
-
-                inventory.AdjustStock(
-                    random.Next(20, 200));
-
-                return inventory;
-            })
-            .ToList();
-
-        await context.Inventories.AddRangeAsync(inventories);
-        await context.SaveChangesAsync();
-
-        var purchaseOrders = new List<PurchaseOrder>();
-
-        foreach (var supplier in suppliers.Take(5))
-        {
-            var order = new PurchaseOrder(
-                supplier.Id);
-
-            var orderProducts = products
-                .OrderBy(_ => random.Next())
-                .Take(3);
-
-            foreach (var product in orderProducts)
-            {
-                order.AddLine(
-                    product.Id,
-                    random.Next(1, 20),
-                    random.Next(10, 500));
-            }
-
-            if (random.Next(0, 2) == 1)
-            {
-                order.Approve();
-            }
-
-            purchaseOrders.Add(order);
+            await SeedStagingDataAsync(context);
+            return;
         }
 
-        await context.PurchaseOrders.AddRangeAsync(
-            purchaseOrders);
-
-        await context.SaveChangesAsync();
+        await SeedDevelopmentDataAsync(context);
     }
 
     private static async Task SeedUserAsync(
@@ -160,15 +68,145 @@ public static class ProcurementDbContextSeed
             return;
         }
 
-        var passwordHash =
-            passwordHasher.HashPassword(password);
-
-        var user = new User(
-            username,
-            passwordHash,
-            role);
+        var passwordHash = passwordHasher.HashPassword(password);
+        var user = new User(username, passwordHash, role);
 
         await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedStagingDataAsync(ProcurementDbContext context)
+    {
+        var categories = new List<Category>
+        {
+            new("Electronics", "Electronic components and devices"),
+            new("Office Supplies", "Office and administrative materials"),
+            new("Industrial Equipment", "Machinery and industrial tools")
+        };
+
+        await context.Categories.AddRangeAsync(categories);
+        await context.SaveChangesAsync();
+
+        var supplier = new Supplier(
+            "SUP-1001",
+            "Global Tech Solutions",
+            "12345678901",
+            "John Doe",
+            "contact@globaltech.com",
+            "+15550192");
+
+        await context.Suppliers.AddAsync(supplier);
+        await context.SaveChangesAsync();
+
+        var product = new Product(
+            "PRD-10001",
+            "Industrial Sensor A1",
+            "High precision optical sensor for assembly lines",
+            categories[0].Id);
+
+        await context.Products.AddAsync(product);
+        await context.SaveChangesAsync();
+
+        var inventory = new Inventory(product.Id, 10, 100);
+        inventory.AdjustStock(50);
+
+        await context.Inventories.AddAsync(inventory);
+        await context.SaveChangesAsync();
+
+        var order = new PurchaseOrder(supplier.Id);
+        order.AddLine(product.Id, 5, 120);
+        order.Approve();
+
+        await context.PurchaseOrders.AddAsync(order);
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedDevelopmentDataAsync(ProcurementDbContext context)
+    {
+        Randomizer.Seed = new Random(8675309);
+        var random = new Random(8675309);
+
+        var categories = new List<Category>
+        {
+            new("Electronics", "Electronic components and devices"),
+            new("Office Supplies", "Office and administrative materials"),
+            new("Industrial Equipment", "Machinery and industrial tools"),
+            new("Safety Equipment", "Workplace safety products"),
+            new("Packaging", "Packaging and shipping materials")
+        };
+
+        await context.Categories.AddRangeAsync(categories);
+        await context.SaveChangesAsync();
+
+        var supplierFaker = new Faker<Supplier>()
+            .CustomInstantiator(f =>
+                new Supplier(
+                    $"SUP-{f.Random.Number(1000, 9999)}",
+                    f.Company.CompanyName(),
+                    f.Random.Replace("##########"),
+                    f.Name.FullName(),
+                    f.Internet.Email(),
+                    f.Phone.PhoneNumber()));
+
+        var suppliers = supplierFaker.Generate(10);
+        await context.Suppliers.AddRangeAsync(suppliers);
+        await context.SaveChangesAsync();
+
+        var productFaker = new Faker<Product>()
+            .CustomInstantiator(f =>
+                new Product(
+                    $"PRD-{f.Random.Number(10000, 99999)}",
+                    f.Commerce.ProductName(),
+                    f.Commerce.ProductDescription(),
+                    f.PickRandom(categories).Id));
+
+        var products = productFaker.Generate(30);
+        await context.Products.AddRangeAsync(products);
+        await context.SaveChangesAsync();
+
+        var inventories = products
+            .Select(product =>
+            {
+                var inventory = new Inventory(
+                    product.Id,
+                    random.Next(5, 50),
+                    random.Next(10, 500));
+
+                inventory.AdjustStock(random.Next(20, 200));
+                return inventory;
+            })
+            .ToList();
+
+        await context.Inventories.AddRangeAsync(inventories);
+        await context.SaveChangesAsync();
+
+        var purchaseOrders = new List<PurchaseOrder>();
+
+        foreach (var supplier in suppliers.Take(5))
+        {
+            var order = new PurchaseOrder(supplier.Id);
+
+            var orderProducts = products
+                .OrderBy(_ => random.Next())
+                .Take(3);
+
+            foreach (var product in orderProducts)
+            {
+                order.AddLine(
+                    product.Id,
+                    random.Next(1, 20),
+                    random.Next(10, 500));
+            }
+
+            if (random.Next(0, 2) == 1)
+            {
+                order.Approve();
+            }
+
+            purchaseOrders.Add(order);
+        }
+
+        await context.PurchaseOrders.AddRangeAsync(purchaseOrders);
         await context.SaveChangesAsync();
     }
 }
