@@ -29,6 +29,9 @@ jobs:
           dotnet nuget locals all --clear
           dotnet restore
 
+      - name: Test
+        run: dotnet test --configuration Release --no-restore
+
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
