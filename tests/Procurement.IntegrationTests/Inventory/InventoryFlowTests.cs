@@ -1,76 +1,63 @@
 using System.Net;
-using System.Net.Http.Json;
 
 using Procurement.Application.Common.Constants;
-
 using Procurement.IntegrationTests.Common;
 
 namespace Procurement.IntegrationTests.Inventory;
 
+[Collection("Integration Tests")]
 public class InventoryFlowTests
-    : IClassFixture<CustomWebApplicationFactory>
+    : IntegrationTestBase
 {
-    private readonly HttpClient _client;
-
     public InventoryFlowTests(
-        CustomWebApplicationFactory factory)
+        SqlServerTestFixture fixture)
+        : base(fixture)
     {
-        _client = factory.CreateClient();
     }
-
 
     private void AuthenticateAs(string role)
     {
-        _client.DefaultRequestHeaders.Remove(
+        Client.DefaultRequestHeaders.Remove(
             "X-Test-Role");
 
-        _client.DefaultRequestHeaders.Add(
+        Client.DefaultRequestHeaders.Add(
             "X-Test-Role",
             role);
     }
-
-
-    [Fact]
-    public async Task GetInventoryById_ShouldReturnNotFound_WhenInventoryDoesNotExist()
-    {
-        AuthenticateAs(RoleConstants.Warehouse);
-
-
-        var response = await _client.GetAsync(
-            $"/api/inventory/{Guid.NewGuid()}");
-
-
-        Assert.Equal(
-            HttpStatusCode.NotFound,
-            response.StatusCode);
-    }
-
 
     [Fact]
     public async Task GetInventory_ShouldAllowWarehouseRole()
     {
         AuthenticateAs(RoleConstants.Warehouse);
 
-
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/inventory");
-
 
         Assert.Equal(
             HttpStatusCode.OK,
             response.StatusCode);
     }
 
+    [Fact]
+    public async Task GetInventoryById_ShouldReturnNotFound_WhenInventoryDoesNotExist()
+    {
+        AuthenticateAs(RoleConstants.Warehouse);
+
+        var response = await Client.GetAsync(
+            $"/api/inventory/{Guid.NewGuid()}");
+
+        Assert.Equal(
+            HttpStatusCode.NotFound,
+            response.StatusCode);
+    }
 
     [Fact]
     public async Task GetInventory_ShouldRejectPurchaserRole()
     {
         AuthenticateAs(RoleConstants.Purchaser);
 
-
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/inventory");
-
 
         Assert.Equal(
             HttpStatusCode.Forbidden,
@@ -82,7 +69,7 @@ public class InventoryFlowTests
     {
         AuthenticateAs(RoleConstants.SuperUser);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/inventory");
 
         Assert.Equal(

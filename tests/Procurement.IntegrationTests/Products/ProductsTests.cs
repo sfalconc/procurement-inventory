@@ -1,37 +1,35 @@
 using System.Net;
+
 using Procurement.Application.Common.Constants;
 using Procurement.IntegrationTests.Common;
 
 namespace Procurement.IntegrationTests.Products;
 
-public class ProductsTests
-    : IClassFixture<CustomWebApplicationFactory>
+[Collection("Integration Tests")]
+public class ProductsTests : IntegrationTestBase
 {
-    private readonly HttpClient _client;
-
     public ProductsTests(
-        CustomWebApplicationFactory factory)
+        SqlServerTestFixture fixture)
+        : base(fixture)
     {
-        _client = factory.CreateClient();
     }
 
     private void AuthenticateAs(string role)
     {
-        _client.DefaultRequestHeaders.Remove(
+        Client.DefaultRequestHeaders.Remove(
             "X-Test-Role");
 
-        _client.DefaultRequestHeaders.Add(
+        Client.DefaultRequestHeaders.Add(
             "X-Test-Role",
             role);
     }
-
 
     [Fact]
     public async Task GetProducts_ShouldAllowPurchaserRole()
     {
         AuthenticateAs(RoleConstants.Purchaser);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/products");
 
         Assert.Equal(
@@ -39,13 +37,12 @@ public class ProductsTests
             response.StatusCode);
     }
 
-
     [Fact]
     public async Task GetProducts_ShouldRejectWarehouseRole()
     {
         AuthenticateAs(RoleConstants.Warehouse);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/products");
 
         Assert.Equal(
@@ -53,13 +50,12 @@ public class ProductsTests
             response.StatusCode);
     }
 
-
     [Fact]
     public async Task GetProductById_ShouldReturnNotFound_WhenProductDoesNotExist()
     {
         AuthenticateAs(RoleConstants.Purchaser);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             $"/api/products/{Guid.NewGuid()}");
 
         Assert.Equal(
@@ -72,7 +68,7 @@ public class ProductsTests
     {
         AuthenticateAs(RoleConstants.SuperUser);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/products");
 
         Assert.Equal(

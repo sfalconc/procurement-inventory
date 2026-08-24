@@ -11,18 +11,14 @@ using Procurement.Infrastructure.Persistence;
 using Procurement.IntegrationTests.Common;
 
 namespace Procurement.IntegrationTests.Authentication;
-
+[Collection("Integration Tests")]
 public class AuthenticationTests
-    : IClassFixture<CustomWebApplicationFactory>
+    : IntegrationTestBase
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
     public AuthenticationTests(
-        CustomWebApplicationFactory factory)
+        SqlServerTestFixture fixture)
+        : base(fixture)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
     }
 
     [Fact]
@@ -33,7 +29,7 @@ public class AuthenticationTests
             "Password123!",
             UserRole.Purchaser);
 
-        var response = await _client.PostAsJsonAsync(
+        var response = await Client.PostAsJsonAsync(
             "/api/auth/login",
             new
             {
@@ -56,7 +52,7 @@ public class AuthenticationTests
     [Fact]
     public async Task Login_ShouldReturnUnauthorized_WhenUserDoesNotExist()
     {
-        var response = await _client.PostAsJsonAsync(
+        var response = await Client.PostAsJsonAsync(
             "/api/auth/login",
             new
             {
@@ -77,7 +73,7 @@ public class AuthenticationTests
             "Password123!",
             UserRole.Purchaser);
 
-        var response = await _client.PostAsJsonAsync(
+        var response = await Client.PostAsJsonAsync(
             "/api/auth/login",
             new
             {
@@ -96,7 +92,7 @@ public class AuthenticationTests
         UserRole role)
     {
         using var scope =
-            _factory.Services.CreateScope();
+            Factory.Services.CreateScope();
 
         var context =
             scope.ServiceProvider

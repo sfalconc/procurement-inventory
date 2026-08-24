@@ -7,28 +7,25 @@ using Microsoft.Extensions.DependencyInjection;
 using Procurement.Application.Common.Interfaces;
 using Procurement.Domain.Entities;
 using Procurement.Domain.Enums;
-using Procurement.IntegrationTests.Common;
 using Procurement.Infrastructure.Persistence;
+
+using Procurement.IntegrationTests.Common;
 
 namespace Procurement.IntegrationTests.Authentication;
 
-public class JwtAuthenticationTests
-    : IClassFixture<CustomWebApplicationFactory>
+[Collection("Integration Tests")]
+public class JwtAuthenticationTests : IntegrationTestBase
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
     public JwtAuthenticationTests(
-        CustomWebApplicationFactory factory)
+        SqlServerTestFixture fixture)
+        : base(fixture)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
     }
 
     [Fact]
     public async Task ProtectedEndpoint_ShouldReturnUnauthorized_WithoutJwt()
     {
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/purchaseorders");
 
         Assert.Equal(
@@ -44,12 +41,12 @@ public class JwtAuthenticationTests
             "Password123!",
             UserRole.Purchaser);
 
-        _client.DefaultRequestHeaders.Authorization =
+        Client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue(
                 "Bearer",
                 token);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/purchaseorders");
 
         Assert.Equal(
@@ -65,12 +62,12 @@ public class JwtAuthenticationTests
             "Password123!",
             UserRole.Warehouse);
 
-        _client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue(
+        Client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue(
                 "Bearer",
                 token);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/purchaseorders");
 
         Assert.Equal(
@@ -83,27 +80,26 @@ public class JwtAuthenticationTests
         string password,
         UserRole role)
     {
-        using (var scope =
-               _factory.Services.CreateScope())
-        {
-            var context =
-                scope.ServiceProvider
-                    .GetRequiredService<ProcurementDbContext>();
+        using var scope =
+            Factory.Services.CreateScope();
 
-            var passwordHasher =
-                scope.ServiceProvider
-                    .GetRequiredService<IPasswordHasher>();
+        var context =
+            scope.ServiceProvider
+                .GetRequiredService<ProcurementDbContext>();
 
-            context.Users.Add(
-                new User(
-                    username,
-                    passwordHasher.HashPassword(password),
-                    role));
+        var passwordHasher =
+            scope.ServiceProvider
+                .GetRequiredService<IPasswordHasher>();
 
-            await context.SaveChangesAsync();
-        }
+        context.Users.Add(
+            new User(
+                username,
+                passwordHasher.HashPassword(password),
+                role));
 
-        var response = await _client.PostAsJsonAsync(
+        await context.SaveChangesAsync();
+
+        var response = await Client.PostAsJsonAsync(
             "/api/auth/login",
             new
             {

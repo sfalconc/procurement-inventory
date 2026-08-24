@@ -1,38 +1,35 @@
 using System.Net;
+
 using Procurement.Application.Common.Constants;
 using Procurement.IntegrationTests.Common;
 
 namespace Procurement.IntegrationTests.PurchaseOrders;
 
-public class PurchaseOrdersTests
-    : IClassFixture<CustomWebApplicationFactory>
+[Collection("Integration Tests")]
+public class PurchaseOrdersTests : IntegrationTestBase
 {
-    private readonly HttpClient _client;
-
     public PurchaseOrdersTests(
-        CustomWebApplicationFactory factory)
+        SqlServerTestFixture fixture)
+        : base(fixture)
     {
-        _client = factory.CreateClient();
     }
-
 
     private void AuthenticateAs(string role)
     {
-        _client.DefaultRequestHeaders.Remove(
+        Client.DefaultRequestHeaders.Remove(
             "X-Test-Role");
 
-        _client.DefaultRequestHeaders.Add(
+        Client.DefaultRequestHeaders.Add(
             "X-Test-Role",
             role);
     }
-
 
     [Fact]
     public async Task GetPurchaseOrders_ShouldAllowPurchaserRole()
     {
         AuthenticateAs(RoleConstants.Purchaser);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/purchaseorders");
 
         Assert.Equal(
@@ -40,13 +37,12 @@ public class PurchaseOrdersTests
             response.StatusCode);
     }
 
-
     [Fact]
     public async Task GetPurchaseOrders_ShouldRejectWarehouseRole()
     {
         AuthenticateAs(RoleConstants.Warehouse);
 
-        var response = await _client.GetAsync(
+        var response = await Client.GetAsync(
             "/api/purchaseorders");
 
         Assert.Equal(
