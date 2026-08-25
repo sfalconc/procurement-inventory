@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 using Procurement.Application.Suppliers.Commands.CreateSupplier;
 using Procurement.Domain.Entities;
 using Procurement.UnitTests.Common;
@@ -15,7 +18,8 @@ public class CreateSupplierCommandHandlerTests : IDisposable
         _database = new SqliteTestDatabase();
 
         _handler = new CreateSupplierCommandHandler(
-            _database.Context);
+            _database.Context,
+            NullLogger<CreateSupplierCommandHandler>.Instance);
     }
 
 

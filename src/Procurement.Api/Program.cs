@@ -10,6 +10,7 @@ using Microsoft.OpenApi;
 
 using Procurement.Api.Exceptions;
 using Procurement.Api.Authentication;
+using Procurement.Api.Middleware;
 using Procurement.Api.Services;
 
 using Procurement.Application.Common.Constants;
@@ -20,12 +21,27 @@ using Procurement.Infrastructure.Extensions;
 using Procurement.Infrastructure.Persistence;
 using Procurement.Infrastructure.Persistence.Seed;
 
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
+
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Application", "Procurement.Api")
+    .WriteTo.Console(new RenderedCompactJsonFormatter())
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
 {
     var keyVaultUri = builder.Configuration["KeyVaultUri"];
-    
+
     if (!string.IsNullOrEmpty(keyVaultUri))
     {
         builder.Configuration.AddAzureKeyVault(
@@ -41,7 +57,8 @@ builder.Services.AddApplication();
 builder.Services.AddControllers();
 
 builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+    .AddSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")!);
 
 builder.Services.AddHttpContextAccessor();
 
@@ -87,14 +104,18 @@ builder.Services.AddAuthorization(options =>
         PolicyConstants.RequirePurchaser,
         policy =>
         {
-            policy.RequireRole(RoleConstants.Purchaser, RoleConstants.SuperUser);
+            policy.RequireRole(
+                RoleConstants.Purchaser,
+                RoleConstants.SuperUser);
         });
 
     options.AddPolicy(
         PolicyConstants.RequireWarehouse,
         policy =>
         {
-            policy.RequireRole(RoleConstants.Warehouse, RoleConstants.SuperUser);
+            policy.RequireRole(
+                RoleConstants.Warehouse,
+                RoleConstants.SuperUser);
         });
 });
 
@@ -120,7 +141,9 @@ builder.Services.AddSwaggerGen(options =>
                 ? new OpenApiSecurityRequirement()
                 : new OpenApiSecurityRequirement
                 {
-                    [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
+                    [new OpenApiSecuritySchemeReference(
+                        "Bearer",
+                        document)] = new List<string>()
                 });
 });
 
@@ -128,6 +151,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 if (!app.Environment.IsEnvironment("Testing"))
 {
@@ -165,6 +190,8 @@ app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
 
+app.UseSerilogRequestLogging();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
@@ -175,7 +202,9 @@ app.MapHealthChecks("/health");
 
 if (app.Environment.IsEnvironment("Testing"))
 {
-    app.MapGet("/api/force-error", () => { throw new Exception("Secret Info"); });
+    app.MapGet(
+        "/api/force-error",
+        () => { throw new Exception("Secret Info"); });
 }
 
 app.Run();
