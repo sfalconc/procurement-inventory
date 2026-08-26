@@ -25,6 +25,9 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
@@ -53,6 +56,17 @@ if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddApplication();
+
+builder.Services
+    .AddOpenTelemetry()
+    .ConfigureResource(resource =>
+        resource.AddService("Procurement.Api"))
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddConsoleExporter();
+    });
 
 builder.Services.AddControllers();
 
