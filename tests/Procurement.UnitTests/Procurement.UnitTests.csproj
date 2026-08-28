@@ -26,6 +26,7 @@
     <ProjectReference Include="..\..\src\Procurement.Application\Procurement.Application.csproj" />
     <ProjectReference Include="..\..\src\Procurement.Domain\Procurement.Domain.csproj" />
     <ProjectReference Include="..\..\src\Procurement.Infrastructure\Procurement.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Procurement.Worker\Procurement.Worker.csproj" />
   </ItemGroup>
 
 </Project>

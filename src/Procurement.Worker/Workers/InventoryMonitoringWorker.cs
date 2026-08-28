@@ -7,12 +7,17 @@ public class InventoryMonitoringWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<InventoryMonitoringWorker> _logger;
+    private readonly INotificationService _notificationService;
+
+    private readonly HashSet<Guid> _notifiedLowStockProducts = new();
 
     public InventoryMonitoringWorker(
         IServiceScopeFactory scopeFactory,
+        INotificationService notificationService,
         ILogger<InventoryMonitoringWorker> logger)
     {
         _scopeFactory = scopeFactory;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -59,7 +64,25 @@ public class InventoryMonitoringWorker : BackgroundService
                         item.ProductName,
                         item.CurrentQuantity,
                         item.MinimumStock);
+
+                    if (_notifiedLowStockProducts.Add(item.ProductId))
+                    {
+                        await _notificationService.SendLowStockNotificationAsync(
+                            item.ProductId,
+                            item.ProductName,
+                            item.CurrentQuantity,
+                            item.MinimumStock,
+                            stoppingToken);
+                    }                 
                 }
+
+                var currentLowStockProductIds =
+                    lowStockItems
+                        .Select(item => item.ProductId)
+                        .ToHashSet();
+
+                _notifiedLowStockProducts
+                    .RemoveWhere(id => !currentLowStockProductIds.Contains(id));               
             }
             catch (OperationCanceledException)
                 when (stoppingToken.IsCancellationRequested)

@@ -3,8 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Procurement.Application.Common.Interfaces;
+
 using Procurement.Infrastructure.Persistence;
 using Procurement.Infrastructure.Identity;
+using Procurement.Infrastructure.Notifications;
 
 namespace Procurement.Infrastructure.Extensions;
 
@@ -20,6 +22,7 @@ public static class DependencyInjection
                 sqlOptions => sqlOptions.EnableRetryOnFailure()));
                 
         services.AddScoped<IApplicationDbContext, ProcurementDbContext>();
+        services.AddScoped<INotificationService, NotificationService>();
                 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
