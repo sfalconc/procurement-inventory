@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Procurement.Api.Exceptions;
 public class GlobalExceptionHandler : IExceptionHandler
@@ -20,6 +21,12 @@ public class GlobalExceptionHandler : IExceptionHandler
         if (exception is ValidationException validationException)
         {
             await HandleValidationExceptionAsync(httpContext, validationException, cancellationToken);
+            return true;
+        }
+
+        if (exception is DbUpdateConcurrencyException)
+        {
+            await HandleConcurrencyExceptionAsync(httpContext, cancellationToken);
             return true;
         }
 
@@ -49,6 +56,23 @@ public class GlobalExceptionHandler : IExceptionHandler
         };
 
         httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+    }
+
+    private static async Task HandleConcurrencyExceptionAsync(
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var problemDetails = new ProblemDetails
+        {
+            Type = "https://httpstatuses.com/409",
+            Title = "Conflict.",
+            Status = StatusCodes.Status409Conflict,
+            Detail = "The inventory record was modified by another user. Please reload and try again.",
+            Instance = httpContext.Request.Path
+        };
+
+        httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
     }
 

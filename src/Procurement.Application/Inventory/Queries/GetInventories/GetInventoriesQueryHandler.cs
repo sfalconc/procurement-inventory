@@ -35,6 +35,7 @@ public class GetInventoriesQueryHandler
             CurrentQuantity = inventory.CurrentQuantity,
             MinimumStock = inventory.MinimumStock,
             AverageUnitCost = inventory.AverageUnitCost,
+            RowVersion = inventory.RowVersion,
             IsLowStock = inventory.CurrentQuantity <= inventory.MinimumStock
         });
     }

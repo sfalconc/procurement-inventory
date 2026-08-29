@@ -12,6 +12,7 @@ public class Inventory : BaseEntity
 
     public decimal AverageUnitCost { get; private set; }
 
+    public byte[] RowVersion { get; private set; }
     public Product Product { get; private set; } = null!;
 
     public ICollection<InventoryMovement> Movements { get; private set; } = new List<InventoryMovement>();

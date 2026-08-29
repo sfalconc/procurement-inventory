@@ -1,7 +1,8 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Procurement.Infrastructure.Persistence;
 using Procurement.Application.Common.Interfaces;
+using Procurement.Domain.Entities;
+using Procurement.Infrastructure.Persistence;
 
 namespace Procurement.UnitTests.Common;
 
@@ -22,7 +23,7 @@ public class SqliteTestDatabase : IDisposable
             .UseSqlite(_connection)
             .Options;
 
-        Context = new ProcurementDbContext(
+        Context = new SqliteProcurementDbContext(
             options,
             new TestCurrentUserService());
 
@@ -33,5 +34,28 @@ public class SqliteTestDatabase : IDisposable
     {
         Context.Dispose();
         _connection.Dispose();
+    }
+
+    private sealed class SqliteProcurementDbContext : ProcurementDbContext
+    {
+        public SqliteProcurementDbContext(
+            DbContextOptions<ProcurementDbContext> options,
+            ICurrentUserService currentUserService)
+            : base(options, currentUserService)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            if (Database.IsSqlite())
+            {
+                modelBuilder.Entity<global::Procurement.Domain.Entities.Inventory>()
+                    .Property(i => i.RowVersion)
+                    .HasDefaultValue(new byte[] { 0 })
+                    .ValueGeneratedOnAddOrUpdate();
+            }
+        }
     }
 }

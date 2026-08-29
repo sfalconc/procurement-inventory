@@ -16,5 +16,7 @@ public class InventoryResponse
 
     public decimal AverageUnitCost { get; set; }
 
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+
     public bool IsLowStock { get; set; }
 }

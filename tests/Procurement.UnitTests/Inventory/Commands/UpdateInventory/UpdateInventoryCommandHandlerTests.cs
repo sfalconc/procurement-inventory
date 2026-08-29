@@ -57,7 +57,8 @@ public class UpdateInventoryCommandHandlerTests : IDisposable
         var command = new UpdateInventoryCommand(
             inventory.Id,
             50,
-            1200);
+            1200,
+            inventory.RowVersion);
 
 
         var result = await _handler.Handle(
@@ -81,7 +82,8 @@ public class UpdateInventoryCommandHandlerTests : IDisposable
         var command = new UpdateInventoryCommand(
             Guid.NewGuid(),
             10,
-            100);
+            100,
+            Array.Empty<byte>());
 
 
         await Assert.ThrowsAsync<KeyNotFoundException>(

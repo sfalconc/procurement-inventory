@@ -5,4 +5,6 @@ public class UpdateInventoryRequest
     public int MinimumStock { get; set; }
 
     public decimal AverageUnitCost { get; set; }
+
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

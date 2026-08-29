@@ -86,7 +86,8 @@ public class InventoryController : ControllerBase
             new UpdateInventoryCommand(
                 id,
                 request.MinimumStock,
-                request.AverageUnitCost),
+                request.AverageUnitCost,
+                request.RowVersion),
             cancellationToken);
 
         return NoContent();

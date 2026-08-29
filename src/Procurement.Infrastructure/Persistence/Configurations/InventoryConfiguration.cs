@@ -30,6 +30,9 @@ public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
             .HasPrecision(18, 2)
             .IsRequired();
 
+        builder.Property(i => i.RowVersion)
+            .IsRowVersion();
+
         builder.HasIndex(i => i.ProductId)
             .IsUnique();
 

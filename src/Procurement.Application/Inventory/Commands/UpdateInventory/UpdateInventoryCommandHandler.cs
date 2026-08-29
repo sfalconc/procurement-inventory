@@ -32,6 +32,14 @@ public class UpdateInventoryCommandHandler
                 "Inventory not found.");
         }
 
+        var dbContext = _context as DbContext
+            ?? throw new InvalidOperationException(
+                "Inventory update requires an EF Core DbContext.");
+
+        dbContext.Entry(inventory)
+            .Property(i => i.RowVersion)
+            .OriginalValue = request.RowVersion;
+
         inventory.UpdateDetails(
             request.MinimumStock,
             request.AverageUnitCost);
@@ -48,6 +56,7 @@ public class UpdateInventoryCommandHandler
             CurrentQuantity = inventory.CurrentQuantity,
             MinimumStock = inventory.MinimumStock,
             AverageUnitCost = inventory.AverageUnitCost,
+            RowVersion = inventory.RowVersion,
             IsLowStock = inventory.CurrentQuantity <= inventory.MinimumStock
         };
     }

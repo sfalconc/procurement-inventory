@@ -29,6 +29,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddUserSecrets<Program>();
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
