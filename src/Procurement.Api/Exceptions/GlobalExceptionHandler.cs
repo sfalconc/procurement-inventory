@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Procurement.Application.Inventory.Exceptions;
 
 namespace Procurement.Api.Exceptions;
 public class GlobalExceptionHandler : IExceptionHandler
@@ -21,6 +22,12 @@ public class GlobalExceptionHandler : IExceptionHandler
         if (exception is ValidationException validationException)
         {
             await HandleValidationExceptionAsync(httpContext, validationException, cancellationToken);
+            return true;
+        }
+
+        if (exception is InsufficientStockException)
+        {
+            await HandleInsufficientStockExceptionAsync(httpContext, cancellationToken);
             return true;
         }
 
@@ -56,6 +63,23 @@ public class GlobalExceptionHandler : IExceptionHandler
         };
 
         httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+    }
+
+    private static async Task HandleInsufficientStockExceptionAsync(
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var problemDetails = new ProblemDetails
+        {
+            Type = "https://httpstatuses.com/409",
+            Title = "Conflict.",
+            Status = StatusCodes.Status409Conflict,
+            Detail = "Insufficient stock for the requested quantity.",
+            Instance = httpContext.Request.Path
+        };
+
+        httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
     }
 

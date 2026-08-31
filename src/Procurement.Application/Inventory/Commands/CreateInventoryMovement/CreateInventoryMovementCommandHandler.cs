@@ -2,6 +2,9 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Procurement.Application.Common.Interfaces;
 using Procurement.Application.Inventory.DTOs;
+using Procurement.Application.Inventory.Exceptions;
+using Procurement.Application.Inventory.Interfaces;
+using Procurement.Application.Inventory.Models;
 using Procurement.Domain.Entities;
 using Procurement.Domain.Enums;
 
@@ -11,94 +14,164 @@ public class CreateInventoryMovementCommandHandler
     : IRequestHandler<CreateInventoryMovementCommand, InventoryMovementResponse>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IInventoryStockService _inventoryStockService;
 
     public CreateInventoryMovementCommandHandler(
-        IApplicationDbContext context)
+        IApplicationDbContext context,
+        IInventoryStockService inventoryStockService)
     {
         _context = context;
+        _inventoryStockService = inventoryStockService;
     }
-
 
     public async Task<InventoryMovementResponse> Handle(
         CreateInventoryMovementCommand request,
         CancellationToken cancellationToken)
     {
-        var inventory = await _context.Inventories
-            .FirstOrDefaultAsync(
-                i => i.Id == request.InventoryId,
-                cancellationToken);
-
-
-        if (inventory is null)
-        {
-            throw new KeyNotFoundException(
-                "Inventory not found.");
-        }
-
-
         if (request.Quantity <= 0)
         {
             throw new InvalidOperationException(
                 "Quantity must be greater than zero.");
         }
 
+        var dbContext = _context as DbContext
+            ?? throw new InvalidOperationException(
+                "Inventory movement requires an EF Core DbContext.");
 
-        switch (request.Type)
+        await using var transaction = await dbContext.Database
+            .BeginTransactionAsync(cancellationToken);
+
+        try
         {
-            case InventoryMovementType.Receipt:
+            if (request.Type == InventoryMovementType.Receipt)
+            {
+                var inventory = await _context.Inventories
+                    .FirstOrDefaultAsync(
+                        i => i.Id == request.InventoryId,
+                        cancellationToken);
 
-                inventory.IncreaseStock(
-                    request.Quantity);
+                if (inventory is null)
+                {
+                    throw new KeyNotFoundException(
+                        "Inventory not found.");
+                }
 
-                break;
+                inventory.IncreaseStock(request.Quantity);
 
+                var movement = new InventoryMovement(
+                    inventory.Id,
+                    request.Type,
+                    request.Quantity,
+                    request.Description);
 
-            case InventoryMovementType.Consumption:
+                await _context.InventoryMovements.AddAsync(
+                    movement,
+                    cancellationToken);
 
-                inventory.DecreaseStock(
-                    request.Quantity);
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
 
-                break;
+                return new InventoryMovementResponse
+                {
+                    Id = movement.Id,
+                    InventoryId = movement.InventoryId,
+                    Type = movement.Type.ToString(),
+                    Quantity = movement.Quantity,
+                    Description = movement.Description,
+                    CreatedAt = movement.CreatedAt
+                };
+            }
 
+            if (request.Type == InventoryMovementType.Adjustment)
+            {
+                var inventory = await _context.Inventories
+                    .FirstOrDefaultAsync(
+                        i => i.Id == request.InventoryId,
+                        cancellationToken);
 
-            case InventoryMovementType.Adjustment:
+                if (inventory is null)
+                {
+                    throw new KeyNotFoundException(
+                        "Inventory not found.");
+                }
 
-                inventory.AdjustStock(
-                    request.Quantity);
+                inventory.AdjustStock(request.Quantity);
 
-                break;
+                var movement = new InventoryMovement(
+                    inventory.Id,
+                    request.Type,
+                    request.Quantity,
+                    request.Description);
 
+                await _context.InventoryMovements.AddAsync(
+                    movement,
+                    cancellationToken);
 
-            default:
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
 
+                return new InventoryMovementResponse
+                {
+                    Id = movement.Id,
+                    InventoryId = movement.InventoryId,
+                    Type = movement.Type.ToString(),
+                    Quantity = movement.Quantity,
+                    Description = movement.Description,
+                    CreatedAt = movement.CreatedAt
+                };
+            }
+
+            if (request.Type != InventoryMovementType.Consumption)
+            {
                 throw new InvalidOperationException(
                     "Movement type not supported.");
+            }
+
+            var stockResult = await _inventoryStockService
+                .DecreaseStockAsync(
+                    request.InventoryId,
+                    request.Quantity,
+                    cancellationToken);
+
+            switch (stockResult.Status)
+            {
+                case InventoryStockStatus.InventoryNotFound:
+                    throw new KeyNotFoundException(
+                        "Inventory not found.");
+
+                case InventoryStockStatus.InsufficientStock:
+                    throw new InsufficientStockException(
+                        request.InventoryId,
+                        request.Quantity);
+            }
+
+            var consumptionMovement = new InventoryMovement(
+                request.InventoryId,
+                request.Type,
+                request.Quantity,
+                request.Description);
+
+            await _context.InventoryMovements.AddAsync(
+                consumptionMovement,
+                cancellationToken);
+
+            await _context.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return new InventoryMovementResponse
+            {
+                Id = consumptionMovement.Id,
+                InventoryId = consumptionMovement.InventoryId,
+                Type = consumptionMovement.Type.ToString(),
+                Quantity = consumptionMovement.Quantity,
+                Description = consumptionMovement.Description,
+                CreatedAt = consumptionMovement.CreatedAt
+            };
         }
-
-        var movement = new InventoryMovement(
-            inventory.Id,
-            request.Type,
-            request.Quantity,
-            request.Description);
-
-
-        await _context.InventoryMovements.AddAsync(
-            movement,
-            cancellationToken);
-
-
-        await _context.SaveChangesAsync(
-            cancellationToken);
-
-
-        return new InventoryMovementResponse
+        catch
         {
-            Id = movement.Id,
-            InventoryId = movement.InventoryId,
-            Type = movement.Type.ToString(),
-            Quantity = movement.Quantity,
-            Description = movement.Description,
-            CreatedAt = movement.CreatedAt
-        };
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 }
