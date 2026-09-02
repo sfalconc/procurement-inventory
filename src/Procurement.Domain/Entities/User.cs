@@ -1,13 +1,19 @@
-using Procurement.Domain.Common;
+using Microsoft.AspNetCore.Identity;
 using Procurement.Domain.Enums;
 
 namespace Procurement.Domain.Entities;
 
-public class User : BaseEntity
+public class User : IdentityUser<Guid>
 {
-    public string Username { get; private set; } = null!;
+    public DateTime CreatedAt { get; set; }
 
-    public string PasswordHash { get; private set; } = null!;
+    public string? CreatedBy { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public string? UpdatedBy { get; set; }
+
+    public bool IsActive { get; private set; } = true;
 
     public UserRole Role { get; private set; }
 
@@ -20,9 +26,21 @@ public class User : BaseEntity
         string passwordHash,
         UserRole role)
     {
-        Username = username;
+        Id = Guid.NewGuid();
+        UserName = username;
         PasswordHash = passwordHash;
         Role = role;
+    }
+
+    public void Delete()
+    {
+        IsActive = false;
+    }
+
+    public void MarkAsUpdated(string? updatedBy)
+    {
+        UpdatedAt = DateTime.UtcNow;
+        UpdatedBy = updatedBy;
     }
 
     public void UpdateRole(UserRole role)

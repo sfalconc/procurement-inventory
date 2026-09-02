@@ -61,7 +61,7 @@ public static class ProcurementDbContextSeed
         UserRole role)
     {
         var userExists = await context.Users
-            .AnyAsync(u => u.Username == username);
+            .AnyAsync(u => u.UserName == username);
 
         if (userExists)
         {

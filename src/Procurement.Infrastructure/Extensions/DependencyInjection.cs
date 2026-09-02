@@ -33,7 +33,9 @@ public static class DependencyInjection
            options.Password.RequireNonAlphanumeric = true;
            options.Password.RequiredLength = 8;
            options.User.RequireUniqueEmail = false;
-       });
+       })
+       .AddRoles<IdentityRole<Guid>>()
+       .AddEntityFrameworkStores<ProcurementDbContext>();
 
        services.AddScoped<IApplicationDbContext, ProcurementDbContext>();
        services.AddScoped<IInventoryStockService, InventoryStockService>();

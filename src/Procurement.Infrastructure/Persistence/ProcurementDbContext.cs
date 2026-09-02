@@ -1,10 +1,14 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Procurement.Domain.Entities;
-using Procurement.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
+using Procurement.Application.Common.Interfaces;
+using Procurement.Domain.Entities;
+
 namespace Procurement.Infrastructure.Persistence;
-public class ProcurementDbContext : DbContext, IApplicationDbContext
+
+public class ProcurementDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>, IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUserService;
 
@@ -33,8 +37,9 @@ public class ProcurementDbContext : DbContext, IApplicationDbContext
     public DbSet<Receipt> Receipts => Set<Receipt>();
 
     public DbSet<ReceiptLine> ReceiptLines => Set<ReceiptLine>();
-    
-    public DbSet<User> Users => Set<User>();
+
+    public new DbSet<User> Users => Set<User>();
+
     public override async Task<int> SaveChangesAsync(
         CancellationToken cancellationToken = default)
     {
@@ -47,6 +52,22 @@ public class ProcurementDbContext : DbContext, IApplicationDbContext
     {
         foreach (EntityEntry entry in ChangeTracker.Entries())
         {
+            if (entry.Entity is User user)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    user.CreatedAt = DateTime.UtcNow;
+                    user.CreatedBy = _currentUserService.UserId;
+                }
+
+                if (entry.State == EntityState.Modified)
+                {
+                    user.MarkAsUpdated(_currentUserService.UserId);
+                }
+
+                continue;
+            }
+
             if (entry.Entity is not Domain.Common.BaseEntity entity)
             {
                 continue;
@@ -60,8 +81,7 @@ public class ProcurementDbContext : DbContext, IApplicationDbContext
 
             if (entry.State == EntityState.Modified)
             {
-                entity.MarkAsUpdated(
-                    _currentUserService.UserId);
+                entity.MarkAsUpdated(_currentUserService.UserId);
             }
         }
     }
@@ -69,6 +89,36 @@ public class ProcurementDbContext : DbContext, IApplicationDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<IdentityRole<Guid>>(entity =>
+        {
+            entity.ToTable("Roles");
+        });
+
+        modelBuilder.Entity<IdentityUserRole<Guid>>(entity =>
+        {
+            entity.ToTable("UserRoles");
+        });
+
+        modelBuilder.Entity<IdentityUserClaim<Guid>>(entity =>
+        {
+            entity.ToTable("UserClaims");
+        });
+
+        modelBuilder.Entity<IdentityUserLogin<Guid>>(entity =>
+        {
+            entity.ToTable("UserLogins");
+        });
+
+        modelBuilder.Entity<IdentityUserToken<Guid>>(entity =>
+        {
+            entity.ToTable("UserTokens");
+        });
+
+        modelBuilder.Entity<IdentityRoleClaim<Guid>>(entity =>
+        {
+            entity.ToTable("RoleClaims");
+        });
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProcurementDbContext).Assembly);
     }

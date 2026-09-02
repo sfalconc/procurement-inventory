@@ -32,7 +32,7 @@ public class LoginCommandHandler
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(
-                u => u.Username == request.Username &&
+                u => u.UserName == request.Username &&
                      u.IsActive,
                 cancellationToken);
 
@@ -54,7 +54,7 @@ public class LoginCommandHandler
         _logger.LogInformation(
             "UserLoginSucceeded {UserId} {Username}",
             user.Id,
-            user.Username);
+            user.UserName);
 
         return new LoginResponse(token);
     }
