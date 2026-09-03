@@ -3,11 +3,8 @@ using System.Net.Http.Json;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Procurement.Application.Common.Interfaces;
 using Procurement.Domain.Entities;
 using Procurement.Domain.Enums;
-using Procurement.Infrastructure.Persistence;
-
 using Procurement.IntegrationTests.Common;
 
 namespace Procurement.IntegrationTests.Authentication;
@@ -94,22 +91,20 @@ public class AuthenticationTests
         using var scope =
             Factory.Services.CreateScope();
 
-        var context =
+        var userManager =
             scope.ServiceProvider
-                .GetRequiredService<ProcurementDbContext>();
+                .GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<User>>();
 
-        var passwordHasher =
-            scope.ServiceProvider
-                .GetRequiredService<IPasswordHasher>();
+        var user = new User(username, string.Empty, role);
+        var result = await userManager.CreateAsync(user, password);
 
-        var user = new User(
-            username,
-            passwordHasher.HashPassword(password),
-            role);
-
-        context.Users.Add(user);
-
-        await context.SaveChangesAsync();
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                string.Join(
+                    "; ",
+                    result.Errors.Select(error => error.Description)));
+        }
     }
 
     private record LoginResponse(string Token);

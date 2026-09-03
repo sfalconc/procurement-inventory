@@ -35,13 +35,16 @@ public static class DependencyInjection
            options.User.RequireUniqueEmail = false;
        })
        .AddRoles<IdentityRole<Guid>>()
+       .AddSignInManager()
        .AddEntityFrameworkStores<ProcurementDbContext>();
 
        services.AddScoped<IApplicationDbContext, ProcurementDbContext>();
+       services.AddScoped<IIdentityUserAuthenticator, IdentityUserAuthenticator>();
        services.AddScoped<IInventoryStockService, InventoryStockService>();
        services.AddScoped<INotificationService, NotificationService>();
 
        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+       services.AddScoped<IPasswordHasher<User>, IdentityPasswordHasher>();
        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
        return services;

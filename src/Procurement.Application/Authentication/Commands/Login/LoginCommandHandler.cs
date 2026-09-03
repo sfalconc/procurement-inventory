@@ -1,5 +1,4 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Procurement.Application.Authentication.DTOs;
 using Procurement.Application.Common.Interfaces;
@@ -9,19 +8,16 @@ namespace Procurement.Application.Authentication.Commands.Login;
 public class LoginCommandHandler
     : IRequestHandler<LoginCommand, LoginResponse>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IPasswordHasher _passwordHasher;
+    private readonly IIdentityUserAuthenticator _identityUserAuthenticator;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly ILogger<LoginCommandHandler> _logger;
 
     public LoginCommandHandler(
-        IApplicationDbContext context,
-        IPasswordHasher passwordHasher,
+        IIdentityUserAuthenticator identityUserAuthenticator,
         IJwtTokenGenerator jwtTokenGenerator,
         ILogger<LoginCommandHandler> logger)
     {
-        _context = context;
-        _passwordHasher = passwordHasher;
+        _identityUserAuthenticator = identityUserAuthenticator;
         _jwtTokenGenerator = jwtTokenGenerator;
         _logger = logger;
     }
@@ -30,16 +26,12 @@ public class LoginCommandHandler
         LoginCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await _context.Users
-            .FirstOrDefaultAsync(
-                u => u.UserName == request.Username &&
-                     u.IsActive,
-                cancellationToken);
+        var user = await _identityUserAuthenticator.ValidateCredentialsAsync(
+            request.Username,
+            request.Password,
+            cancellationToken);
 
-        if (user is null ||
-            !_passwordHasher.VerifyPassword(
-                request.Password,
-                user.PasswordHash))
+        if (user is null)
         {
             _logger.LogWarning(
                 "UserLoginFailed {Username}",

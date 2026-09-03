@@ -4,11 +4,8 @@ using System.Net.Http.Json;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Procurement.Application.Common.Interfaces;
 using Procurement.Domain.Entities;
 using Procurement.Domain.Enums;
-using Procurement.Infrastructure.Persistence;
-
 using Procurement.IntegrationTests.Common;
 
 namespace Procurement.IntegrationTests.Authentication;
@@ -83,21 +80,20 @@ public class JwtAuthenticationTests : IntegrationTestBase
         using var scope =
             Factory.Services.CreateScope();
 
-        var context =
+        var userManager =
             scope.ServiceProvider
-                .GetRequiredService<ProcurementDbContext>();
+                .GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<User>>();
 
-        var passwordHasher =
-            scope.ServiceProvider
-                .GetRequiredService<IPasswordHasher>();
+        var user = new User(username, string.Empty, role);
+        var createResult = await userManager.CreateAsync(user, password);
 
-        context.Users.Add(
-            new User(
-                username,
-                passwordHasher.HashPassword(password),
-                role));
-
-        await context.SaveChangesAsync();
+        if (!createResult.Succeeded)
+        {
+            throw new InvalidOperationException(
+                string.Join(
+                    "; ",
+                    createResult.Errors.Select(error => error.Description)));
+        }
 
         var response = await Client.PostAsJsonAsync(
             "/api/auth/login",
