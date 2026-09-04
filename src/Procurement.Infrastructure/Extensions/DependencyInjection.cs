@@ -27,11 +27,19 @@ public static class DependencyInjection
 
        services.AddIdentityCore<User>(options =>
        {
+           options.Password.RequiredLength = 12;
            options.Password.RequireDigit = true;
            options.Password.RequireLowercase = true;
            options.Password.RequireUppercase = true;
-           options.Password.RequireNonAlphanumeric = true;
-           options.Password.RequiredLength = 8;
+           options.Password.RequireNonAlphanumeric = false;
+
+           options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+           options.Lockout.MaxFailedAccessAttempts = 5;
+           options.Lockout.AllowedForNewUsers = true;
+
+           options.SignIn.RequireConfirmedEmail = false;
+           options.SignIn.RequireConfirmedAccount = false;
+
            options.User.RequireUniqueEmail = false;
        })
        .AddRoles<IdentityRole<Guid>>()
