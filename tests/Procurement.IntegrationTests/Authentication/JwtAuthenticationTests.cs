@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 using Procurement.Domain.Entities;
@@ -83,6 +84,9 @@ public class JwtAuthenticationTests : IntegrationTestBase
         var userManager =
             scope.ServiceProvider
                 .GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<User>>();
+        var roleManager =
+            scope.ServiceProvider
+                .GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 
         var user = new User(username, string.Empty, role);
         var createResult = await userManager.CreateAsync(user, password);
@@ -93,6 +97,30 @@ public class JwtAuthenticationTests : IntegrationTestBase
                 string.Join(
                     "; ",
                     createResult.Errors.Select(error => error.Description)));
+        }
+
+        var roleName = role.ToString();
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            var roleResult = await roleManager.CreateAsync(
+                    new IdentityRole<Guid>(roleName));
+
+            if (!roleResult.Succeeded)
+            {
+                    throw new InvalidOperationException(
+                        string.Join(
+                            "; ",
+                            roleResult.Errors.Select(error => error.Description)));
+            }
+        }
+
+        var addRoleResult = await userManager.AddToRoleAsync(user, roleName);
+        if (!addRoleResult.Succeeded)
+        {
+            throw new InvalidOperationException(
+                    string.Join(
+                        "; ",
+                        addRoleResult.Errors.Select(error => error.Description)));
         }
 
         var response = await Client.PostAsJsonAsync(

@@ -51,9 +51,8 @@ public static class DependencyInjection
        services.AddScoped<IInventoryStockService, InventoryStockService>();
        services.AddScoped<INotificationService, NotificationService>();
 
-       services.AddSingleton<IPasswordHasher, PasswordHasher>();
        services.AddScoped<IPasswordHasher<User>, IdentityPasswordHasher>();
-       services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+       services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
        return services;
    }

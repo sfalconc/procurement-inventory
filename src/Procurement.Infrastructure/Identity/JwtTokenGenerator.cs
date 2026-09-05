@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
 using Procurement.Application.Common.Interfaces;
 using Procurement.Domain.Entities;
 
@@ -11,13 +12,19 @@ namespace Procurement.Infrastructure.Identity;
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly IConfiguration _configuration;
+    private readonly UserManager<User> _userManager;
 
-    public JwtTokenGenerator(IConfiguration configuration)
+    public JwtTokenGenerator(
+        IConfiguration configuration,
+        UserManager<User> userManager)
     {
         _configuration = configuration;
+        _userManager = userManager;
     }
 
-    public string GenerateToken(User user)
+    public async Task<string> GenerateTokenAsync(
+        User user,
+        CancellationToken cancellationToken = default)
     {
         var jwtSettings = _configuration
             .GetSection("JwtSettings");
@@ -44,16 +51,16 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             key,
             SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var roles = await _userManager.GetRolesAsync(user);
+        var claims = new List<Claim>
         {
             new Claim(
                 ClaimTypes.NameIdentifier,
                 user.Id.ToString()),
-
-            new Claim(
-                ClaimTypes.Role,
-                user.Role.ToString())
         };
+
+        claims.AddRange(
+            roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var token = new JwtSecurityToken(
             issuer: issuer,

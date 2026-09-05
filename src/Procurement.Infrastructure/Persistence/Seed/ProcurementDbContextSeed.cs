@@ -1,6 +1,6 @@
 using Bogus;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Procurement.Application.Common.Interfaces;
 using Procurement.Domain.Entities;
 using Procurement.Domain.Enums;
 
@@ -10,10 +10,12 @@ public static class ProcurementDbContextSeed
 {
     public static async Task SeedAsync(
         ProcurementDbContext context,
-        IPasswordHasher passwordHasher,
+        UserManager<User> userManager,
+        RoleManager<IdentityRole<Guid>> roleManager,
         string environmentName)
     {
-        await SeedUserAsync(context, passwordHasher);
+        await SeedRolesAsync(roleManager);
+        await SeedUserAsync(userManager);
 
         if (environmentName.Equals("Production", StringComparison.OrdinalIgnoreCase))
         {
@@ -35,44 +37,76 @@ public static class ProcurementDbContextSeed
     }
 
     private static async Task SeedUserAsync(
-        ProcurementDbContext context,
-        IPasswordHasher passwordHasher)
+        UserManager<User> userManager)
     {
         await CreateUserIfNotExistsAsync(
-            context,
-            passwordHasher,
+            userManager,
             "superuser",
             "SuperUser123!",
             UserRole.SuperUser);
 
         await CreateUserIfNotExistsAsync(
-            context,
-            passwordHasher,
+            userManager,
             "purchaser",
             "Purchaser123!",
             UserRole.Purchaser);
     }
 
     private static async Task CreateUserIfNotExistsAsync(
-        ProcurementDbContext context,
-        IPasswordHasher passwordHasher,
+        UserManager<User> userManager,
         string username,
         string password,
         UserRole role)
     {
-        var userExists = await context.Users
-            .AnyAsync(u => u.UserName == username);
-
-        if (userExists)
+        var user = await userManager.FindByNameAsync(username);
+        if (user is null)
         {
-            return;
+            user = new User(username, string.Empty, role);
+            var result = await userManager.CreateAsync(user, password);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    string.Join(
+                        "; ",
+                        result.Errors.Select(error => error.Description)));
+            }
         }
 
-        var passwordHash = passwordHasher.HashPassword(password);
-        var user = new User(username, passwordHash, role);
+        var roleName = role.ToString();
+        if (!await userManager.IsInRoleAsync(user, roleName))
+        {
+            var result = await userManager.AddToRoleAsync(user, roleName);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    string.Join(
+                        "; ",
+                        result.Errors.Select(error => error.Description)));
+            }
+        }
+    }
 
-        await context.Users.AddAsync(user);
-        await context.SaveChangesAsync();
+    private static async Task SeedRolesAsync(
+        RoleManager<IdentityRole<Guid>> roleManager)
+    {
+        foreach (var roleName in Enum.GetNames<UserRole>())
+        {
+            if (await roleManager.RoleExistsAsync(roleName))
+            {
+                continue;
+            }
+
+            var result = await roleManager.CreateAsync(
+                new IdentityRole<Guid>(roleName));
+
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    string.Join(
+                        "; ",
+                        result.Errors.Select(error => error.Description)));
+            }
+        }
     }
 
     private static async Task SeedStagingDataAsync(ProcurementDbContext context)

@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -16,6 +17,7 @@ using Procurement.Api.Services;
 using Procurement.Application.Common.Constants;
 using Procurement.Application.Common.Interfaces;
 using Procurement.Application.Extensions;
+using Procurement.Domain.Entities;
 
 using Procurement.Infrastructure.Extensions;
 using Procurement.Infrastructure.Persistence;
@@ -185,12 +187,16 @@ if (!app.Environment.IsEnvironment("Testing"))
             await context.Database.EnsureCreatedAsync();
         }
 
-        var passwordHasher =
-            scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        var userManager =
+            scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        var roleManager =
+            scope.ServiceProvider
+                .GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 
         await ProcurementDbContextSeed.SeedAsync(
             context,
-            passwordHasher,
+            userManager,
+            roleManager,
             app.Environment.EnvironmentName);
     }
 }

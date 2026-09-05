@@ -41,7 +41,9 @@ public class LoginCommandHandler
                 "Invalid username or password.");
         }
 
-        var token = _jwtTokenGenerator.GenerateToken(user);
+        var token = await _jwtTokenGenerator.GenerateTokenAsync(
+            user,
+            cancellationToken);
 
         _logger.LogInformation(
             "UserLoginSucceeded {UserId} {Username}",
