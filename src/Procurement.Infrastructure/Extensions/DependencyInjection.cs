@@ -9,6 +9,7 @@ using Procurement.Domain.Entities;
 
 using Procurement.Infrastructure.Persistence;
 using Procurement.Infrastructure.Identity;
+using Procurement.Infrastructure.DomainEvents;
 using Procurement.Infrastructure.Notifications;
 using Procurement.Infrastructure.Services;
 
@@ -47,6 +48,7 @@ public static class DependencyInjection
        .AddEntityFrameworkStores<ProcurementDbContext>();
 
        services.AddScoped<IApplicationDbContext, ProcurementDbContext>();
+       services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
        services.AddScoped<IIdentityUserAuthenticator, IdentityUserAuthenticator>();
        services.AddScoped<IInventoryStockService, InventoryStockService>();
        services.AddScoped<INotificationService, NotificationService>();

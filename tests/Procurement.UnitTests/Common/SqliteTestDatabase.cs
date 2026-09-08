@@ -25,7 +25,8 @@ public class SqliteTestDatabase : IDisposable
 
         Context = new SqliteProcurementDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
 
         Context.Database.EnsureCreated();
     }
@@ -40,8 +41,9 @@ public class SqliteTestDatabase : IDisposable
     {
         public SqliteProcurementDbContext(
             DbContextOptions<ProcurementDbContext> options,
-            ICurrentUserService currentUserService)
-            : base(options, currentUserService)
+            ICurrentUserService currentUserService,
+            IDomainEventDispatcher domainEventDispatcher)
+            : base(options, currentUserService, domainEventDispatcher)
         {
         }
 

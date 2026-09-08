@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Procurement.Application.Common.Interfaces;
+using Procurement.Domain.Common;
 using Procurement.Infrastructure.Identity;
 
 namespace Procurement.Infrastructure.Persistence;
@@ -27,6 +29,18 @@ public class ProcurementDbContextFactory : IDesignTimeDbContextFactory<Procureme
 
         return new ProcurementDbContext(
             optionsBuilder.Options,
-            new DesignTimeCurrentUserService());
+            new DesignTimeCurrentUserService(),
+            new DesignTimeDomainEventDispatcher());
             }
+
+    private sealed class DesignTimeDomainEventDispatcher
+        : IDomainEventDispatcher
+    {
+        public Task DispatchAsync(
+            IReadOnlyCollection<BaseEntity> entities,
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+    }
 }

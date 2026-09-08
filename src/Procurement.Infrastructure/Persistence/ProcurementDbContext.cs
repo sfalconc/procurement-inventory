@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 using Procurement.Application.Common.Interfaces;
+using Procurement.Domain.Common;
 using Procurement.Domain.Entities;
 
 namespace Procurement.Infrastructure.Persistence;
@@ -11,13 +12,16 @@ namespace Procurement.Infrastructure.Persistence;
 public class ProcurementDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>, IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUserService;
+    private readonly IDomainEventDispatcher _domainEventDispatcher;
 
     public ProcurementDbContext(
         DbContextOptions<ProcurementDbContext> options,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IDomainEventDispatcher domainEventDispatcher)
         : base(options)
     {
         _currentUserService = currentUserService;
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     public DbSet<Category> Categories => Set<Category>();
@@ -45,7 +49,40 @@ public class ProcurementDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     {
         UpdateAuditFields();
 
-        return await base.SaveChangesAsync(cancellationToken);
+        IReadOnlyCollection<BaseEntity> entitiesWithEvents =
+            GetEntitiesWithDomainEvents();
+
+        int result = await base.SaveChangesAsync(cancellationToken);
+
+        await DispatchDomainEventsAsync(
+            entitiesWithEvents,
+            cancellationToken);
+
+        return result;
+    }
+
+    private IReadOnlyCollection<BaseEntity> GetEntitiesWithDomainEvents()
+    {
+        return ChangeTracker
+            .Entries()
+            .Select(entry => entry.Entity)
+            .OfType<BaseEntity>()
+            .Where(entity => entity.DomainEvents.Count > 0)
+            .ToArray();
+    }
+
+    private Task DispatchDomainEventsAsync(
+        IReadOnlyCollection<BaseEntity> entities,
+        CancellationToken cancellationToken)
+    {
+        if (entities.Count == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        return _domainEventDispatcher.DispatchAsync(
+            entities,
+            cancellationToken);
     }
 
     private void UpdateAuditFields()

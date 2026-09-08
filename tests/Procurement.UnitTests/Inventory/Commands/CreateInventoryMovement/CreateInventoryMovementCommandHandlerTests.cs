@@ -239,7 +239,8 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
 
         await using (var setupContext = new SqliteInventoryDbContext(
             options,
-            new TestCurrentUserService()))
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher()))
         {
             await setupContext.Database.EnsureCreatedAsync();
 
@@ -265,7 +266,8 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
 
         await using var failingContext = new ThrowingProcurementDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
 
         var inventoryId = await failingContext.Inventories
             .Select(i => i.Id)
@@ -289,7 +291,8 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
 
         await using var verificationContext = new SqliteInventoryDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
 
         var verifiedInventory = await verificationContext.Inventories
             .SingleAsync(i => i.Id == inventoryId);
@@ -312,7 +315,8 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
 
         await using (var setupContext = new SqliteInventoryDbContext(
             options,
-            new TestCurrentUserService()))
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher()))
         {
             await setupContext.Database.EnsureCreatedAsync();
 
@@ -338,10 +342,12 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
 
         await using var firstContext = new SqliteInventoryDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
         await using var secondContext = new SqliteInventoryDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
 
         var inventoryId = await firstContext.Inventories
             .Select(i => i.Id)
@@ -374,7 +380,8 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
 
         await using var finalContext = new SqliteInventoryDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
 
         var finalInventory = await finalContext.Inventories
             .SingleAsync(i => i.Id == inventoryId);
@@ -399,8 +406,9 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
     {
         public SqliteInventoryDbContext(
             DbContextOptions<ProcurementDbContext> options,
-            ICurrentUserService currentUserService)
-            : base(options, currentUserService)
+            ICurrentUserService currentUserService,
+            IDomainEventDispatcher domainEventDispatcher)
+            : base(options, currentUserService, domainEventDispatcher)
         {
         }
 
@@ -422,8 +430,9 @@ public class CreateInventoryMovementCommandHandlerTests : IDisposable
     {
         public ThrowingProcurementDbContext(
             DbContextOptions<ProcurementDbContext> options,
-            ICurrentUserService currentUserService)
-            : base(options, currentUserService)
+            ICurrentUserService currentUserService,
+            IDomainEventDispatcher domainEventDispatcher)
+            : base(options, currentUserService, domainEventDispatcher)
         {
         }
 

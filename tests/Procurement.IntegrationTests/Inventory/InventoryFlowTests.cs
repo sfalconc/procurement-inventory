@@ -55,7 +55,8 @@ public class InventoryFlowTests
 
         await using var setupContext = new ProcurementDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
 
         var category = new Category(
             "Electronics",
@@ -83,11 +84,13 @@ public class InventoryFlowTests
 
         await using var firstContext = new ProcurementDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
 
         await using var secondContext = new ProcurementDbContext(
             options,
-            new TestCurrentUserService());
+            new TestCurrentUserService(),
+            new TestDomainEventDispatcher());
 
         var firstInventory = await firstContext.Inventories
             .SingleAsync(i => i.Id == inventory.Id);
