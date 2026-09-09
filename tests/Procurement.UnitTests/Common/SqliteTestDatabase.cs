@@ -11,6 +11,7 @@ public class SqliteTestDatabase : IDisposable
     private readonly SqliteConnection _connection;
 
     public ProcurementDbContext Context { get; }
+    public TestDomainEventDispatcher DomainEventDispatcher { get; }
 
     public SqliteTestDatabase()
     {
@@ -23,10 +24,11 @@ public class SqliteTestDatabase : IDisposable
             .UseSqlite(_connection)
             .Options;
 
+        DomainEventDispatcher = new TestDomainEventDispatcher();
         Context = new SqliteProcurementDbContext(
             options,
             new TestCurrentUserService(),
-            new TestDomainEventDispatcher());
+            DomainEventDispatcher);
 
         Context.Database.EnsureCreated();
     }

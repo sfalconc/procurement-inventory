@@ -26,6 +26,19 @@ public class InventoryStockService : IInventoryStockService
                 "Quantity must be greater than zero.");
         }
 
+        var inventory = await _context.Inventories
+            .FirstOrDefaultAsync(
+                i => i.Id == inventoryId,
+                cancellationToken);
+
+        if (inventory is null)
+        {
+            return new InventoryStockResult(
+                InventoryStockStatus.InventoryNotFound,
+                inventoryId);
+        }
+
+        var previousQuantity = inventory.CurrentQuantity;
         var affectedRows = await _context.Inventories
             .Where(i => i.Id == inventoryId && i.CurrentQuantity >= quantity)
             .ExecuteUpdateAsync(
@@ -42,20 +55,19 @@ public class InventoryStockService : IInventoryStockService
                 .Select(i => i.CurrentQuantity)
                 .SingleAsync(cancellationToken);
 
+            inventory.RecordStockChange(
+                previousQuantity,
+                newQuantity);
+            var quantityEntry = _context.Entry(inventory)
+                .Property(i => i.CurrentQuantity);
+            quantityEntry.CurrentValue = newQuantity;
+            quantityEntry.OriginalValue = newQuantity;
+            quantityEntry.IsModified = false;
+
             return new InventoryStockResult(
                 InventoryStockStatus.Success,
                 inventoryId,
                 newQuantity);
-        }
-
-        var inventoryExists = await _context.Inventories
-            .AnyAsync(i => i.Id == inventoryId, cancellationToken);
-
-        if (!inventoryExists)
-        {
-            return new InventoryStockResult(
-                InventoryStockStatus.InventoryNotFound,
-                inventoryId);
         }
 
         return new InventoryStockResult(

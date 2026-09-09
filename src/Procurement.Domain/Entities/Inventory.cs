@@ -1,4 +1,5 @@
 using Procurement.Domain.Common;
+using Procurement.Domain.Events.Inventory;
 
 namespace Procurement.Domain.Entities;
 
@@ -21,8 +22,14 @@ public class Inventory : BaseEntity
         int minimumStock,
         decimal averageUnitCost)
     {
+        var previousMinimumStock = MinimumStock;
         MinimumStock = minimumStock;
         AverageUnitCost = averageUnitCost;
+        RaiseLowStockEventIfTransitioned(
+            CurrentQuantity,
+            previousMinimumStock,
+            CurrentQuantity,
+            MinimumStock);
     }
 
     public Inventory(
@@ -44,7 +51,13 @@ public class Inventory : BaseEntity
                 "Quantity must be greater than zero.");
         }
 
+        var previousQuantity = CurrentQuantity;
         CurrentQuantity += quantity;
+        RaiseLowStockEventIfTransitioned(
+            previousQuantity,
+            MinimumStock,
+            CurrentQuantity,
+            MinimumStock);
     }
 
 
@@ -62,7 +75,13 @@ public class Inventory : BaseEntity
                 "Insufficient stock.");
         }
 
+        var previousQuantity = CurrentQuantity;
         CurrentQuantity -= quantity;
+        RaiseLowStockEventIfTransitioned(
+            previousQuantity,
+            MinimumStock,
+            CurrentQuantity,
+            MinimumStock);
     }
 
     public void AdjustStock(int newQuantity)
@@ -73,12 +92,53 @@ public class Inventory : BaseEntity
                 "Stock quantity cannot be negative.");
         }
 
+        var previousQuantity = CurrentQuantity;
         CurrentQuantity = newQuantity;
+        RaiseLowStockEventIfTransitioned(
+            previousQuantity,
+            MinimumStock,
+            CurrentQuantity,
+            MinimumStock);
     }
 
     public void SetMinimumStock(int minimumStock)
     {
+        var previousMinimumStock = MinimumStock;
         MinimumStock = minimumStock;
+        RaiseLowStockEventIfTransitioned(
+            CurrentQuantity,
+            previousMinimumStock,
+            CurrentQuantity,
+            MinimumStock);
     }
 
+    public void RecordStockChange(
+        int previousQuantity,
+        int newQuantity)
+    {
+        CurrentQuantity = newQuantity;
+        RaiseLowStockEventIfTransitioned(
+            previousQuantity,
+            MinimumStock,
+            newQuantity,
+            MinimumStock);
+    }
+
+    private void RaiseLowStockEventIfTransitioned(
+        int previousQuantity,
+        int previousMinimumStock,
+        int newQuantity,
+        int newMinimumStock)
+    {
+        if (previousQuantity > previousMinimumStock &&
+            newQuantity <= newMinimumStock)
+        {
+            AddDomainEvent(
+                new LowStockEvent(
+                    Id,
+                    ProductId,
+                    newQuantity,
+                    newMinimumStock));
+        }
+    }
 }
