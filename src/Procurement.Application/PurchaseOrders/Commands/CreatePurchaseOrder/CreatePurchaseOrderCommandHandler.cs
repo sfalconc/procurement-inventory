@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Procurement.Application.Common.Interfaces;
 using Procurement.Application.PurchaseOrders.DTOs;
 using Procurement.Domain.Entities;
+using Procurement.Domain.Events.PurchaseOrders;
 
 namespace Procurement.Application.PurchaseOrders.Commands.CreatePurchaseOrder;
 
@@ -40,6 +41,9 @@ public class CreatePurchaseOrderCommandHandler
 
         _context.PurchaseOrders.Add(
             purchaseOrder);
+
+        purchaseOrder.AddDomainEvent(
+            new PurchaseOrderCreatedEvent(purchaseOrder.Id));
 
         await _context.SaveChangesAsync(
             cancellationToken);

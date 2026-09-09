@@ -1,5 +1,6 @@
 using Procurement.Domain.Common;
 using Procurement.Domain.Enums;
+using Procurement.Domain.Events.PurchaseOrders;
 
 namespace Procurement.Domain.Entities;
 
@@ -28,6 +29,7 @@ public class PurchaseOrder : BaseEntity
             throw new InvalidOperationException("Only draft purchase orders can be approved.");
 
         Status = PurchaseOrderStatus.Approved;
+        AddDomainEvent(new PurchaseOrderApprovedEvent(Id));
     }
 
     public void Reject()
@@ -36,6 +38,7 @@ public class PurchaseOrder : BaseEntity
             throw new InvalidOperationException("Only draft purchase orders can be rejected.");
 
         Status = PurchaseOrderStatus.Rejected;
+        AddDomainEvent(new PurchaseOrderRejectedEvent(Id));
     }
 
     public void Cancel()
@@ -44,6 +47,7 @@ public class PurchaseOrder : BaseEntity
             throw new InvalidOperationException("Completed purchase orders cannot be cancelled.");
 
         Status = PurchaseOrderStatus.Cancelled;
+        AddDomainEvent(new PurchaseOrderCancelledEvent(Id));
     }
 
     public void MarkAsPartiallyReceived()
@@ -52,6 +56,7 @@ public class PurchaseOrder : BaseEntity
             throw new InvalidOperationException("Purchase order must be approved.");
 
         Status = PurchaseOrderStatus.PartiallyReceived;
+        AddDomainEvent(new PurchaseOrderPartiallyReceivedEvent(Id));
     }
 
     public void MarkAsCompleted()
@@ -61,6 +66,7 @@ public class PurchaseOrder : BaseEntity
             throw new InvalidOperationException("Purchase order is not ready to complete.");
 
         Status = PurchaseOrderStatus.Completed;
+        AddDomainEvent(new PurchaseOrderCompletedEvent(Id));
     }
     
     public void UpdateSupplier(Guid supplierId)
