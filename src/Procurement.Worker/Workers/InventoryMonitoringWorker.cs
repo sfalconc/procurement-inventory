@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Procurement.Application.Common.Interfaces;
+using Procurement.Application.Common.Models;
 
 namespace Procurement.Worker.Workers;
 
@@ -67,11 +68,12 @@ public class InventoryMonitoringWorker : BackgroundService
 
                     if (_notifiedLowStockProducts.Add(item.ProductId))
                     {
-                        await _notificationService.SendLowStockNotificationAsync(
-                            item.ProductId,
-                            item.ProductName,
-                            item.CurrentQuantity,
-                            item.MinimumStock,
+                        await _notificationService.SendAsync(
+                            new NotificationMessage(
+                                "LowStock",
+                                $"Low stock: {item.ProductName}",
+                                $"Product {item.ProductName} ({item.ProductId}) has {item.CurrentQuantity} units remaining. Minimum stock is {item.MinimumStock}.",
+                                item.ProductId),
                             stoppingToken);
                     }                 
                 }

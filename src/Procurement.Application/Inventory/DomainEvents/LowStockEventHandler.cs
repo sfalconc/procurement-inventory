@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Procurement.Application.Common;
 using Procurement.Application.Common.Interfaces;
+using Procurement.Application.Common.Models;
 using Procurement.Domain.Events.Inventory;
 
 namespace Procurement.Application.Inventory.DomainEvents;
@@ -36,11 +37,12 @@ public sealed class LowStockEventHandler
             ?? throw new KeyNotFoundException(
                 $"Product '{domainEvent.ProductId}' not found.");
 
-        await _notificationService.SendLowStockNotificationAsync(
-            domainEvent.ProductId,
-            productName,
-            domainEvent.CurrentQuantity,
-            domainEvent.MinimumStock,
+        await _notificationService.SendAsync(
+            new NotificationMessage(
+                "LowStock",
+                $"Low stock: {productName}",
+                $"Product {productName} ({domainEvent.ProductId}) has {domainEvent.CurrentQuantity} units remaining. Minimum stock is {domainEvent.MinimumStock}.",
+                domainEvent.ProductId),
             cancellationToken);
     }
 }

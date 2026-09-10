@@ -1,11 +1,10 @@
+using Procurement.Application.Common.Models;
+
 namespace Procurement.Application.Common.Interfaces;
 
 public interface INotificationService
 {
-    Task SendLowStockNotificationAsync(
-        Guid productId,
-        string productName,
-        int currentQuantity,
-        int minimumStock,
+    Task SendAsync(
+        NotificationMessage notification,
         CancellationToken cancellationToken);
 }

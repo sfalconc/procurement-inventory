@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Procurement.Application.Common;
 using Procurement.Application.Common.Interfaces;
+using Procurement.Application.Common.Models;
 using Procurement.Application.Inventory.DomainEvents;
 using Procurement.Infrastructure.Services;
 using Procurement.Domain.Entities;
@@ -161,9 +162,10 @@ public class LowStockDomainEventsTests
             CancellationToken.None);
 
         var notification = Assert.Single(notificationService.Notifications);
-        Assert.Equal(product.Id, notification.ProductId);
-        Assert.Equal(5, notification.CurrentQuantity);
-        Assert.Equal(10, notification.MinimumStock);
+        Assert.Equal("LowStock", notification.Category);
+        Assert.Equal(product.Id, notification.TargetId);
+        Assert.Contains("5 units remaining", notification.Content);
+        Assert.Contains("10", notification.Content);
     }
 
     [Fact]
@@ -198,28 +200,14 @@ public class LowStockDomainEventsTests
 
     private sealed class RecordingNotificationService : INotificationService
     {
-        public List<Notification> Notifications { get; } = [];
+        public List<NotificationMessage> Notifications { get; } = [];
 
-        public Task SendLowStockNotificationAsync(
-            Guid productId,
-            string productName,
-            int currentQuantity,
-            int minimumStock,
+        public Task SendAsync(
+            NotificationMessage notification,
             CancellationToken cancellationToken)
         {
-            Notifications.Add(
-                new Notification(
-                    productId,
-                    productName,
-                    currentQuantity,
-                    minimumStock));
+            Notifications.Add(notification);
             return Task.CompletedTask;
         }
     }
-
-    private sealed record Notification(
-        Guid ProductId,
-        string ProductName,
-        int CurrentQuantity,
-        int MinimumStock);
 }
