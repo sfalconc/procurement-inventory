@@ -24,6 +24,9 @@ public class CustomWebApplicationFactory
         IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.UseSetting(
+            "JwtSettings:SecretKey",
+            "TestJwtSigningKeyForDevelopmentOnly_1234567890");
 
         builder.ConfigureAppConfiguration(
             (_, config) =>
@@ -31,9 +34,6 @@ public class CustomWebApplicationFactory
                 config.AddInMemoryCollection(
                     new Dictionary<string, string?>
                     {
-                        ["JwtSettings:SecretKey"] =
-                            "TestJwtSigningKeyForDevelopmentOnly_1234567890",
-
                         ["JwtSettings:Issuer"] =
                             "Procurement.Api",
 
