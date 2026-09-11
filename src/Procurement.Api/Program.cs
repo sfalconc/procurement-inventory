@@ -84,10 +84,47 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 var jwtSettings = builder.Configuration
     .GetSection("JwtSettings");
 
+var secretKey = jwtSettings["SecretKey"];
+if (string.IsNullOrWhiteSpace(secretKey))
+{
+    throw new InvalidOperationException(
+        "JwtSettings:SecretKey must be configured before authentication is enabled.");
+}
+
+if (Encoding.UTF8.GetByteCount(secretKey) < 32)
+{
+    throw new InvalidOperationException(
+        "JwtSettings:SecretKey must be at least 32 characters long.");
+}
+
+var issuer = jwtSettings["Issuer"];
+if (string.IsNullOrWhiteSpace(issuer))
+{
+    throw new InvalidOperationException(
+        "JwtSettings:Issuer must be configured before authentication is enabled.");
+}
+
+var audience = jwtSettings["Audience"];
+if (string.IsNullOrWhiteSpace(audience))
+{
+    throw new InvalidOperationException(
+        "JwtSettings:Audience must be configured before authentication is enabled.");
+}
+
+var expirationMinutesValue = jwtSettings["ExpirationMinutes"] ?? "120";
+if (!int.TryParse(expirationMinutesValue, out var expirationMinutes) ||
+    expirationMinutes <= 0)
+{
+    throw new InvalidOperationException(
+        "JwtSettings:ExpirationMinutes must be a positive integer.");
+}
+
 builder.Services.AddAuthentication(
     JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
@@ -95,6 +132,7 @@ builder.Services.AddAuthentication(
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.FromMinutes(1),
 
                 ValidIssuer = jwtSettings["Issuer"],
                 ValidAudience = jwtSettings["Audience"],

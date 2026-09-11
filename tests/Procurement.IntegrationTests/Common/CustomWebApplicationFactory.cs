@@ -32,7 +32,7 @@ public class CustomWebApplicationFactory
                     new Dictionary<string, string?>
                     {
                         ["JwtSettings:SecretKey"] =
-                            "7f4a9c2e8d1b6f3a5e9c0d7a2b8f4e6c1a9d5f7b3e8c2a6",
+                            "TestJwtSigningKeyForDevelopmentOnly_1234567890",
 
                         ["JwtSettings:Issuer"] =
                             "Procurement.Api",

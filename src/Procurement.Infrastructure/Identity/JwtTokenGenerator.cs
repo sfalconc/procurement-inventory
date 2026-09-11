@@ -29,20 +29,39 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         var jwtSettings = _configuration
             .GetSection("JwtSettings");
 
-        var secretKey = jwtSettings["SecretKey"]
-            ?? throw new InvalidOperationException(
+        var secretKey = jwtSettings["SecretKey"];
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            throw new InvalidOperationException(
                 "JWT SecretKey is not configured.");
+        }
 
-        var issuer = jwtSettings["Issuer"]
-            ?? throw new InvalidOperationException(
+        if (Encoding.UTF8.GetByteCount(secretKey) < 32)
+        {
+            throw new InvalidOperationException(
+                "JWT SecretKey must be at least 32 characters long.");
+        }
+
+        var issuer = jwtSettings["Issuer"];
+        if (string.IsNullOrWhiteSpace(issuer))
+        {
+            throw new InvalidOperationException(
                 "JWT Issuer is not configured.");
+        }
 
-        var audience = jwtSettings["Audience"]
-            ?? throw new InvalidOperationException(
+        var audience = jwtSettings["Audience"];
+        if (string.IsNullOrWhiteSpace(audience))
+        {
+            throw new InvalidOperationException(
                 "JWT Audience is not configured.");
+        }
 
-        var expirationMinutes =
-            int.Parse(jwtSettings["ExpirationMinutes"] ?? "120");
+        var expirationMinutesValue = jwtSettings["ExpirationMinutes"] ?? "120";
+        if (!int.TryParse(expirationMinutesValue, out var expirationMinutes) || expirationMinutes <= 0)
+        {
+            throw new InvalidOperationException(
+                "JWT ExpirationMinutes must be a positive integer.");
+        }
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(secretKey));
