@@ -15,12 +15,13 @@ public static class ProcurementDbContextSeed
         string environmentName)
     {
         await SeedRolesAsync(roleManager);
-        await SeedUserAsync(userManager);
 
         if (environmentName.Equals("Production", StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
+
+        await SeedUserAsync(userManager);
 
         if (await context.Categories.AnyAsync())
         {
