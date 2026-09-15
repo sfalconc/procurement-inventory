@@ -34,11 +34,7 @@ public class CreateInventoryMovementCommandHandler
                 "Quantity must be greater than zero.");
         }
 
-        var dbContext = _context as DbContext
-            ?? throw new InvalidOperationException(
-                "Inventory movement requires an EF Core DbContext.");
-
-        await using var transaction = await dbContext.Database
+        await using var transaction = await _context.Database
             .BeginTransactionAsync(cancellationToken);
 
         try

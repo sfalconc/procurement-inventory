@@ -32,11 +32,7 @@ public class UpdateInventoryCommandHandler
                 "Inventory not found.");
         }
 
-        var dbContext = _context as DbContext
-            ?? throw new InvalidOperationException(
-                "Inventory update requires an EF Core DbContext.");
-
-        dbContext.Entry(inventory)
+        _context.Entry(inventory)
             .Property(i => i.RowVersion)
             .OriginalValue = request.RowVersion;
 
