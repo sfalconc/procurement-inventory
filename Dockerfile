@@ -2,7 +2,7 @@
 # Build stage
 # =========================
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /src
 
@@ -27,7 +27,7 @@ RUN dotnet publish "Procurement.Api.csproj" \
 # Runtime stage
 # =========================
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 
 WORKDIR /app
 
