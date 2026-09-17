@@ -32,7 +32,7 @@ public sealed class IdentityUserAuthenticator : IIdentityUserAuthenticator
         var result = await _signInManager.CheckPasswordSignInAsync(
             user,
             password,
-            lockoutOnFailure: false);
+            lockoutOnFailure: true);
 
         return result.Succeeded ? user : null;
     }

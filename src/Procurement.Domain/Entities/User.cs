@@ -30,6 +30,7 @@ public class User : IdentityUser<Guid>
         UserName = username;
         PasswordHash = passwordHash;
         Role = role;
+        LockoutEnabled = true;
     }
 
     public void Delete()
