@@ -37,7 +37,7 @@ services:
 
       ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=ProcurementDb;User Id=sa;Password=${SQLSERVER_SA_PASSWORD:-LOCAL_ONLY_CHANGE_THIS_PASSWORD_1234567890!};TrustServerCertificate=True;"
 
-      JwtSettings__SecretKey: "${JWT_SECRET_KEY:-ReplaceWithAtLeast32CharacterSecret}"
+      JwtSettings__SecretKey: "${JWT_SECRET_KEY:?JWT_SECRET_KEY must be set to a random value of at least 32 bytes}"
       JwtSettings__Issuer: "Procurement.Api"
       JwtSettings__Audience: "Procurement.Client"
       JwtSettings__ExpirationMinutes: "120"
