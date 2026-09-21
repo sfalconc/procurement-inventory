@@ -53,7 +53,6 @@ public static class DependencyInjection
        services.AddScoped<IInventoryStockService, InventoryStockService>();
        services.AddScoped<INotificationService, NotificationService>();
 
-       services.AddScoped<IPasswordHasher<User>, IdentityPasswordHasher>();
        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
        return services;
