@@ -51,6 +51,12 @@ public static class ProcurementDbContextSeed
             "purchaser",
             "Purchaser123!",
             UserRole.Purchaser);
+
+        await CreateUserIfNotExistsAsync(
+            userManager,
+            "warehouse",
+            "Warehouse123!",
+            UserRole.Warehouse);
     }
 
     private static async Task CreateUserIfNotExistsAsync(
