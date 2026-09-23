@@ -1,201 +1,217 @@
-# Procurement And Inventory Management Platform
+# Procurement and Inventory Management System
 
-Backend platform for managing procurement and inventory processes, designed around a realistic enterprise application scenario. The project demonstrates the implementation of a production oriented .NET backend using modern architectural patterns, security practices, automated testing, containerization, and continuous integration (CI).
+Backend system for managing procurement and inventory processes in a small and medium sized business context. The project demonstrates the implementation of a production oriented .NET 10 backend using Clean Architecture, CQRS, domain events, authentication and authorization, automated testing, containerization, observability, and cloud deployment practices.
 
 ## Overview
 
-The idea for this project came from researching the type of software commonly used in modern business environments, including enterprise platforms and solutions focused on internal processes such as procurement, inventory, logistics, and supplier management.
+The motivation behind this project came from researching the type of software commonly used in modern business environments, including enterprise platforms and solutions focused on internal processes such as procurement, inventory, logistics, and supplier management.
 
-Based on that research, I chose procurement and inventory management as a representative business domain and designed the project as an environment to apply modern backend engineering practices, including architecture, security, testing, API design, containerization, and cloud oriented development.
+Based on that research, I chose procurement and inventory management as a representative domain. The project was designed as an environment to apply backend engineering practices, including architecture, security, testing, API design, containerization, and cloud development.
 
-This project corresponds to the MVP of a procurement and inventory management platform, conceived for small and medium sized businesses looking to digitalize processes that are commonly managed through spreadsheets and email. The implementation is structured as an evolving product, with the current version focusing on the core backend architecture and a subsequent V2 roadmap covering advanced architecture, cloud deployment, observability, background processing, and integration testing.
+The system is designed around common workflows such as:
 
-## Key Features
+- Product and supplier management.
+- Purchase orders and receiving management.
+- Stock movements and low stock monitoring.
+
+**Note:** The project is focused strictly on backend development. No frontend application is included.
+
+## Features
 
 - Product and category management.
 - Supplier management.
-- Procurement and inventory domain modeling.
-- Clean Architecture.
-- CQRS with MediatR.
-- Entity Framework Core.
-- SQL Server.
-- JWT-based authentication.
-- Role-based and policy-based authorization.
-- Secure password hashing with PBKDF2.
-- Optimistic concurrency for inventory operations.
-- Audit information for relevant entities.
-- Unit and integration testing (using Bogus for test data).
-- Docker containerization.
-- GitHub Actions CI.
+- Inventory management and stock movements.
+- Minimum stock level configuration and low stock monitoring.
+- Purchase order creation and lifecycle management.
+- Purchase order receiving and receipt management.
+- User authentication using ASP.NET Core Identity and JWT.
+- Role based and policy based authorization.
+- Auditing and optimistic concurrency.
+- Domain events using MediatR.
+- Background inventory monitoring.
+- Notification abstraction for low stock events.
+- Automated unit and integration testing.
+- SQL Server integration testing with Testcontainers.
+- Docker and Docker Compose support.
+- CI/CD with GitHub Actions.
+- Azure App Service deployment.
+- Azure Key Vault integration.
+- Structured logging with Serilog.
+- OpenTelemetry tracing.
+- Correlation IDs and health checks.
 - Swagger / OpenAPI documentation.
-- Health checks.
-- Database migrations.
 
 ## Architecture
 
-The solution follows Clean Architecture, separating business rules from infrastructure and delivery concerns.
+The solution follows Clean Architecture principles, keeping the domain and application logic independent from infrastructure and API concerns.
 
 <img src="docs/images/project-structure.png" alt="Project structure" width="30%"/>
 
-### Main Layers
+### Solution Structure
 
-- **Procurement.Domain:** Contains the core business entities, enums, and domain rules.
-- **Procurement.Application:** Contains use cases, commands, queries, DTOs, validation, interfaces, and application-level business orchestration.
-- **Procurement.Infrastructure:** Contains persistence and infrastructure implementations, including Entity Framework Core, SQL Server integration, authentication related persistence, and database seeding.
-- **Procurement.Api:** Exposes the application through HTTP APIs and contains authentication, authorization, middleware, Swagger configuration, health checks, and API composition.
+```text
+src/
+├── Procurement.Domain
+├── Procurement.Application
+├── Procurement.Infrastructure
+├── Procurement.Api
+└── Procurement.Worker
+
+tests/
+├── Procurement.UnitTests
+└── Procurement.IntegrationTests
+```
+
+### Project Responsibilities
+
+- **Procurement.Domain:** Contains the core business model, including entities, business rules, domain state transitions, and domain events.
+- **Procurement.Application:** Contains application use cases implemented through CQRS commands and queries, MediatR handlers, DTOs, validators, domain event handlers, and application interfaces.
+- **Procurement.Infrastructure:** Contains implementations for persistence and infrastructure concerns, including Entity Framework Core, SQL Server, ASP.NET Core Identity, JWT generation, domain event dispatching, notifications, and database seeding.
+- **Procurement.Api:** Exposes the application through HTTP APIs and contains controllers, authentication and authorization configuration, middleware, Swagger, health checks, exception handling, and application startup configuration.
+- **Procurement.Worker:** A separate .NET Worker responsible for monitoring inventory and processing low stock notifications in the background.
 
 ## Technology Stack
 
-| Technology                | Purpose                                  |
-| ------------------------- | ---------------------------------------- |
-| **.NET 8**                | Backend platform                         |
-| **C#**                    | Programming language                     |
-| **ASP.NET Core**          | Web API                                  |
-| **Entity Framework Core** | ORM / data access                        |
-| **SQL Server**            | Relational database                      |
-| **MediatR**               | CQRS implementation                      |
-| **JWT Bearer**            | Authentication                           |
-| **PBKDF2**                | Password hashing                         |
-| **xUnit**                 | Testing framework                        |
-| **Bogus**                 | Fake data generation for testing/seeding |
-| **Docker**                | Containerization                         |
-| **Docker Compose**        | Local multi-container environment        |
-| **Swagger / OpenAPI**     | API documentation                        |
-| **GitHub Actions**        | Continuous Integration (CI)              |
+| Technology            | Purpose                                                 |
+| --------------------- | ------------------------------------------------------- |
+| .NET 10               | Backend platform                                        |
+| C#                    | Programming language                                    |
+| ASP.NET Core          | Web API                                                 |
+| ASP.NET Core Identity | User and role management                                |
+| Entity Framework Core | Data access                                             |
+| SQL Server            | Relational database                                     |
+| MediatR               | CQRS and domain event handling                          |
+| FluentValidation      | Request and command validation                          |
+| JWT Bearer            | API authentication                                      |
+| xUnit                 | Testing framework                                       |
+| Moq                   | Mocking                                                 |
+| SQLite                | Lightweight relational database for selected unit tests |
+| Bogus                 | Test and seed data generation                           |
+| Testcontainers        | SQL Server integration testing                          |
+| Docker                | Containerization                                        |
+| Docker Compose        | Local development environment                           |
+| Serilog               | Structured logging                                      |
+| OpenTelemetry         | Tracing instrumentation                                 |
+| Azure Key Vault       | Secret management                                       |
+| Azure App Service     | API hosting                                             |
+| Azure SQL Database    | Cloud database                                          |
+| GitHub Actions        | CI/CD                                                   |
+| Swagger / OpenAPI     | API documentation                                       |
 
-## Authentication & Authorization
+## Authentication and Authorization
 
-The API implements JWT-based authentication and role-based authorization using ASP.NET Core Authentication and Authorization.
+The application uses ASP.NET Core Identity for user and role management and JWT bearer authentication for API access.
 
-### Authentication Flow
-
-Authentication is handled through the following flow:
-
-1. The client sends credentials to `POST /api/auth/login`.
-2. The application retrieves the user by username.
-3. The password is verified against the stored password hash.
-4. A JWT is generated for valid credentials.
-5. The client includes the JWT in subsequent requests using the `Authorization: Bearer <token>` header.
-6. ASP.NET Core validates the token before allowing access to protected endpoints.
-
-The authentication flow follows the project's Clean Architecture and CQRS structure:
-
-```text
-AuthController
+- **Login Flow (`POST /api/auth/login`):** Requests are verified by Identity. Upon successful authentication, a JWT containing the user's identifier and role claims is generated.
+  ```text
+  Login request
       ↓
-LoginCommand
+  ASP.NET Core Identity
       ↓
-LoginCommandHandler
+  Password verification
       ↓
-User + Password Verification
+  JWT generation
       ↓
-IJwtTokenGenerator
-      ↓
-JWT
-```
+  Protected API endpoints
+  ```
+- **Identity Configuration:** Enforces 12-character minimum passwords (requiring at least one digit, uppercase, and lowercase letter). Accounts are locked for 15 minutes after five failed attempts.
+- **Swagger:** Includes built in Bearer authentication support for testing protected API endpoints.
 
-### Login Endpoint
+* **Roles and Policies:**
 
-**POST** `/api/auth/login`
+  | Role          | Description                                                   | Policy             |
+  | ------------- | ------------------------------------------------------------- | ------------------ |
+  | **SuperUser** | Full access. Bypasses Purchaser and Warehouse restrictions.   | `RequireSuperUser` |
+  | **Purchaser** | Manages products, categories, suppliers, and purchase orders. | `RequirePurchaser` |
+  | **Warehouse** | Manages inventory and receiving operations.                   | `RequireWarehouse` |
 
-Request:
+* **Demo Users:** Development and staging environments are seeded with the following accounts (these are strictly excluded from Production):
 
-```json
-{
-  "username": "admin",
-  "password": "Admin123!"
-}
-```
+  | Username    | Role      | Password        |
+  | ----------- | --------- | --------------- |
+  | `superuser` | SuperUser | `SuperUser123!` |
+  | `purchaser` | Purchaser | `Purchaser123!` |
+  | `warehouse` | Warehouse | `Warehouse123!` |
 
-Successful response:
+## Validation
 
-```json
-{
-  "token": "<JWT>"
-}
-```
+Application commands and requests are validated using FluentValidation.
+Validators are integrated into the application request pipeline and execute before command handlers process requests.
+This keeps validation rules separate from application handlers and provides consistent validation across the API.
 
-_The returned JWT contains the authenticated user's identifier and role._
+## Domain Events
 
-### Test User
+The application uses domain events to separate important business state changes from the actions that may need to happen afterward.
 
-A development/test user is created automatically through database seeding. The password is stored as an irreversible PBKDF2 hash and is never persisted as plain text.
+Entities collect domain events while their state changes. The events are dispatched through MediatR after successful persistence.
 
-| Field        | Value     |
-| ------------ | --------- |
-| **Username** | admin     |
-| **Password** | Admin123! |
-| **Role**     | Admin     |
+### Purchase Order Events
 
-_Note: The development credentials are intended only for local testing._
+Lifecycle events processed at the application level for logging:
 
-### Authorization
+- PurchaseOrderCreatedEvent
+- PurchaseOrderApprovedEvent
+- PurchaseOrderRejectedEvent
+- PurchaseOrderCancelledEvent
+- PurchaseOrderPartiallyReceivedEvent
+- PurchaseOrderCompletedEvent
 
-The API uses role-based authorization through ASP.NET Core policies. Available roles:
+### Low Stock Events
 
-- Admin
-- Purchaser
-- Warehouse
+Triggered when: `CurrentQuantity <= MinimumStockLevel`
 
-Endpoints can require a specific role through the corresponding authorization policy (e.g., `RequireAdmin`, `RequirePurchaser`, `RequireWarehouse`). Authorization is enforced at the API layer.
+- **State transition:** Detects the initial drop below minimum stock to prevent duplicate events.
+- **Execution context:** Handlers may execute before outer database transactions commit.
+- **Future scaling:** Adding external side effects (e.g., notifications) will require implementing an Outbox pattern.
 
-- An authenticated user with an insufficient role receives `403 Forbidden`.
-- A request without valid authentication receives `401 Unauthorized`.
+## Notifications
 
-### Swagger Authentication
+The application defines a provider independent `INotificationService` abstraction for notifications generated by application events.
 
-Swagger UI can be used to test authenticated endpoints.
+The current implementation logs notifications instead of sending them through an external email, SMS, or messaging provider.
 
-1. Open Swagger: `http://localhost:8080/swagger`
-2. Execute `POST /api/auth/login`.
-3. Copy the returned JWT.
-4. Click **Authorize** at the top of the page.
-5. Enter: `Bearer <JWT>` (The word Bearer must be included before the token).
-6. Click **Authorize**.
-7. Execute the protected endpoints. Swagger will automatically include the JWT in the Authorization header.
+This keeps the application independent from a specific notification provider while leaving the integration point available for a future implementation.
 
-<img src="docs/images/swagger-api.png" alt="Swagger API" width="95%"/>
+## Background Processing
 
-<img src="docs/images/swagger-products.png" alt="SAuthenticated Products API" width="95%"/>
+The project includes a separate .NET Worker that monitors inventory in the background.
+The InventoryMonitoringWorker:
 
-### Current User and Auditing
+- Runs periodically every five minutes.
+- Checks products against their minimum stock level.
+- Processes low stock notifications.
+- Uses the notification service abstraction.
+- Keeps track of products already notified during the current Worker execution.
 
-The application provides a `CurrentUserService` for accessing information about the authenticated user through `HttpContext`. Authenticated user information is used for auditing, including fields such as `CreatedBy`, `UpdatedBy`, and `UpdatedAt`.
+This prevents repeated notifications while a product remains below its minimum stock level.
+If inventory recovers and later becomes low again, the product can enter a new notification cycle.
 
-## Security & Secrets Management
+## Database
 
-### JWT & Secrets Management Strategy
+The application uses SQL Server with Entity Framework Core.
+The database contains the main procurement and inventory entities as well as the ASP.NET Core Identity tables.
 
-Authentication is implemented using JWT bearer tokens. The API validates the token issuer, audience, lifetime, and signing key.
+### Migrations
 
-JWT configuration is loaded through the standard .NET configuration pipeline. The signing key is intentionally excluded from source control and is not stored in `appsettings.json`.
+- **Coverage:** EF Core migrations include initial database creation, user integration, inventory concurrency, and ASP.NET Core Identity.
+- **Execution:** Applied automatically at application startup in SQL Server environments (except `Testing`).
 
-The application uses environment-specific configuration for sensitive values:
+### Concurrency
 
-- **Local Execution:** The API can run directly on the development machine using local configuration. Sensitive configuration is excluded from source control.
-- **Docker:** Containerized local execution uses environment variables defined through `docker-compose.yml` and a local `.env` file. The `.env` file is excluded from source control.
-- **Azure:** Azure Key Vault is added as a configuration provider during application startup when a `KeyVaultUri` is configured.
-- **Authentication:** The application uses `DefaultAzureCredential()` to authenticate with Azure Key Vault. In Azure, the App Service uses a System-Assigned Managed Identity authorized through Azure RBAC.
-- **Runtime Configuration:** Secrets retrieved from Key Vault become part of the application's standard configuration pipeline _before_ infrastructure services and JWT authentication are registered. This makes the resolved configuration available to services that require it during application startup and runtime.
+- **Mechanism:** Optimistic concurrency using SQL Server `rowversion` on inventory records.
+- **Conflict Handling:** Modifications using an outdated row version are rejected and return a `409 Conflict` HTTP status.
 
-## Cloud Deployment (Azure)
+### Auditing
 
-The application is deployed to Microsoft Azure using managed services for API hosting, relational data persistence, and secure secrets management.
+- **Tracked Fields:** Relevant entities include `CreatedBy`, `UpdatedBy`, and `UpdatedAt`.
+- **Data Source:** Audit information is automatically populated using the authenticated user's context.
 
-### Azure Resources
+### Data Seeding
 
-- **Azure App Service:** Hosts the .NET 8 Web API.
-- **Azure SQL Database:** Managed relational database for application data persistence.
-- **Azure Key Vault:** Secure storage and runtime configuration of sensitive application secrets.
+- **Development and Staging:** Seeds users and sample business data for testing and local development.
+- **Production:** Creates only required roles, omits development users and sample data.
 
-### Deployment Evidence
-
-- **Live API (Swagger):** [Swagger UI - Procurement API](https://procurement-inventory-sf-bmawd3c2a7fuh4a0.southeastasia-01.azurewebsites.net/swagger/index.html)
-- **Live Health Check:** [API Health Status](https://procurement-inventory-sf-bmawd3c2a7fuh4a0.southeastasia-01.azurewebsites.net/health)
-
-<img src="docs/images/azure-resources.png" alt="Azure Resources" width="95%"/>
-
-## Testing, Authentication, and Authorization
+## Testing
 
 The solution contains separate unit and integration test projects:
 
@@ -205,86 +221,82 @@ tests/
 └── Procurement.IntegrationTests
 ```
 
-- **Test Authentication Handler:** Integration tests use a dedicated `TestAuthenticationHandler` to isolate authorization behavior from the real authentication flow. The test authentication scheme can simulate authenticated users with different roles through the `X-Test-Role` header.
-- **Data Generation:** The **Bogus** library is utilized to generate realistic fake data for unit tests, integration tests, and database seeding, ensuring robust and varied test scenarios.
-- **Execution:** Run all tests with `dotnet test`.
+The current test suite contains 118 tests total (73 unit tests, 45 integration tests).
 
-## Running Locally
+- **Unit Tests:** Unit tests use xUnit and Moq. SQLite is used for tests that require relational database behavior, while Bogus is used to generate realistic test data where appropriate.
+- **Integration Tests:** Integration tests run the API through ASP.NET Core's test hosting infrastructure and use Testcontainers to create a temporary SQL Server container. This allows the integration tests to validate the application against the same relational database technology used by the application. The integration environment also applies the application's EF Core migrations when the test database is created.
+- **Test Authentication:** Integration tests use a dedicated `TestAuthenticationHandler` to simulate authenticated users with specific roles. This allows authorization behavior to be tested without depending on the production login flow for every test.
 
-### Prerequisites
+## Security and Configuration
 
-- .NET 8 SDK
-- Docker Desktop
-- Git
+Sensitive configuration is kept outside source control, supporting multiple providers (application files, environment variables, .NET User Secrets, Docker Compose, and Azure Key Vault).
 
-### Configuration
+- **Secrets Management:** No secret values are stored as insecure defaults. The `.env` file is excluded from Git, while `.env.example` documents expected configuration keys.
+- **JWT Validation:** Startup checks enforce signing key presence and minimum length, issuer, audience, and token expiration. Bearer authentication validation includes a one-minute clock tolerance.
+- **Azure Key Vault:** Staging and Production environments load secrets dynamically when `KeyVaultUri` is configured. `DefaultAzureCredential` handles passwordless authentication to Azure services.
 
-Environment specific configuration is provided through .NET User Secrets and environment variables. Required values:
+## Docker and Local Development
 
-- `ConnectionStrings__DefaultConnection`
-- `JwtSettings__SecretKey`
-- `JwtSettings__Issuer`
-- `JwtSettings__Audience`
-- `JwtSettings__ExpirationMinutes`
+The repository includes a multi stage Dockerfile and a Docker Compose configuration for running the API and SQL Server locally.
 
-### Docker Compose
+<img src="docs/images/docker-compose.png" alt="Docker compose configuration" width="95%"/>
 
-The local environment consists of the ASP.NET Core API and SQL Server.
+- **Docker Compose:** The local environment contains the Procurement API and SQL Server 2022.
+  - **API Endpoints:**
+    - Swagger: http://localhost:8080/swagger
+    - Health Check: http://localhost:8080/health
+  - **Database:** SQL Server is exposed at `localhost:1434` (uses standard port `1433` inside the Docker network).
+  - **Commands:**
+    - Start: `docker compose up --build`
+    - Stop: `docker compose down`
+- **Local Configuration:** Docker Compose supports configuration through environment variables. Sensitive local values can be provided through a local `.env` file or other local configuration mechanisms. The `.env` file is excluded from Git, while `.env.example` provides an example of the expected configuration values without containing real secrets.
 
-<img src="docs/images/docker-compose.png" alt="Docker Compose" width="95%"/>
+## Observability
 
-Start the environment with:
+The API includes logging, tracing, correlation IDs, and health checks to support application diagnostics.
 
-```bash
-docker compose up --build
-```
+- **Logging:** Uses Serilog for structured application and request logging. Logs automatically include application context and request correlation information.
+- **Correlation IDs:** Accepts client-provided `X-Correlation-ID` headers or generates a new ID per request. The ID is returned in the response and injected into the logging context for tracing.
+- **OpenTelemetry:** Configured for ASP.NET Core tracing instrumentation. Currently exports tracing data to the console (no external observability backend is configured).
+- **Health Checks:** Exposes a `GET /health` endpoint to verify API status and SQL Server connectivity.
 
-- **API:** `http://localhost:8080`
-- **Swagger:** `http://localhost:8080/swagger`
-- **Health check:** `http://localhost:8080/health`
+## CI/CD
 
-To stop the environment:
+The project uses GitHub Actions for automated validation and Azure deployment via the `.github/workflows/main-pipeline.yml` workflow. It triggers automatically on pushes to `develop` and `main` (or manually), with Azure access managed through the configured GitHub Actions integration.
 
-```bash
-docker compose down
-```
+<img src="docs/images/github-actions.png" alt="GitHub Actions workflow" width="95%"/>
 
-_SQL Server data is persisted through a Docker volume._
+- **Build and Test:** The pipeline restores the solution, runs automated tests, builds in Release configuration, and stores the published API as a deployment artifact.
+- **Staging:** Pushes to `develop` deploy the API to the `procurement-inventory-sf-staging` App Service.
+- **Production:** Pushes to `main` deploy the API to the `procurement-inventory-sf` App Service.
 
-## CI (Continuous Integration)
+## Azure
 
-The project uses GitHub Actions for continuous integration. The CI workflow restores dependencies, builds the solution, and executes the automated test suite.
+The project is configured to use Azure for cloud hosting and supporting services. Application configuration is included, but resource provisioning and access are managed outside this repository.
 
-<img src="docs/images/github-actions.png" alt="GitHub Actions" width="95%"/>
+- **Azure App Service:** Hosts the API.
+- **Azure SQL Database:** Cloud relational database.
+- **Azure Key Vault:** Secure secret storage.
+- **Managed Identity:** Passwordless authentication between Azure resources.
 
-## Development Practices
+<img src="docs/images/azure-resources.png" alt="Azure resources" width="95%"/>
 
-The project follows practices intended to keep the codebase maintainable as the application grows:
+## API Documentation
 
-- Separation of concerns through Clean Architecture.
-- CQRS for application use cases.
-- Dependency inversion and explicit application interfaces.
-- Automated unit and integration testing (utilizing Bogus).
-- Role based and policy based authorization.
-- Secure password hashing.
-- Environment-based configuration and secure secret handling.
-- Containerized local development.
-- Automated CI validation.
-- Database migrations and health checks.
-- API documentation through OpenAPI / Swagger.
+- **Swagger / OpenAPI:** Available locally at http://localhost:8080/swagger. Includes the configured Bearer authentication scheme for testing protected endpoints.
 
-## Roadmap
+  <img src="docs/images/swagger-api.png" alt="Swagger API documentation" width="95%"/>
 
-The project is planned as an incremental evolution from the current MVP toward a more complete enterprise oriented platform.
+  <img src="docs/images/swagger-products.png" alt="Swagger products endpoints" width="95%"/>
 
-### V2 — Advanced Architecture And Cloud
+## Future Extensions
 
-- **Domain Events and Notification Service:** Domain Events, MediatR Notifications, Notification Service, Low Stock Notifications, Purchase Order Events.
-- **Background Processing:** Worker Service, BackgroundService, Scheduled Jobs, Inventory Monitoring, Reorder Alerts.
-- **Azure Deployment:** Azure App Service, Azure SQL Database, Azure Key Vault, GitHub Actions Deployment.
-- **Observability:** Serilog, OpenTelemetry, Correlation IDs, Structured Logging, Distributed Tracing.
-- **Integration Testing with Testcontainers:** Testcontainers, SQL Server Container, Migration from SQLite In-Memory, Expanded integration test coverage.
-- **Release V2.0.0:** Build validation, Automated tests, Documentation, Git tag, GitHub Release.
+- **Worker:** Independent deployment of the Worker.
+- **Notifications:** Integration with an external notification provider for low stock alerts.
+- **Observability:** External observability infrastructure for application monitoring and diagnostics.
+- **Infrastructure:** Infrastructure as Code (IaC) for Azure resources.
+- **Workflows:** Additional procurement and inventory workflows.
+- **Frontend:** Frontend application development.
 
 ## License
 
